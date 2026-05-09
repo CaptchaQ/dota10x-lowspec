@@ -171,6 +171,58 @@ REM Шаг 3 — добавить "-language minify" в Steam launch options Dot
 5_pak66_builder\set_launch_option.bat
 ```
 
+### Сократить время загрузки карты
+
+Партиклы — не самое тяжёлое что Dota грузит. В стоковом `pak01_dir.vpk`:
+
+| Категория | Файлов | Размер | Можно трогать? |
+|----------|---------|--------|--------------------|
+| `sounds/vo/**/*.vsnd_c` (войсы героев) | 91,020 | **3,773 MB** | да |
+| `models/items/**/*.vmdl_c` (косметика) | 12,245 | **1,483 MB** | да |
+| `sounds/music/**/*.vsnd_c` (музыка) | 876 | **1,130 MB** | да |
+| `sounds/weapons/**/*.vsnd_c` (звуки атак) | 2,639 | **792 MB** | да |
+| `materials/models/items/**/*.vmat_c` | 13,317 | **131 MB** | да |
+| `particles/econ/items/**/*.vpcf_c` | 39,945 | **102 MB** | да |
+| `sounds/items/**/*.vsnd_c` | 184 | 81 MB | да |
+| `sounds/ambient/**/*.vsnd_c` | 242 | 158 MB | да |
+| **ИТОГО `all-safe`** | **160,468** | **~7.6 GB** | да |
+| `models/heroes/**` (базовые герои) | 1,705 | 513 MB | **НЕТ** — игра падает |
+| `sounds/ui/**` | 556 | 153 MB | **НЕТ** — ломает меню |
+
+Заменяет каждый `all-safe` файл на минимальный стаб из
+`vendor/dota2-minify/blank-files/` (1.5 KB на `.vsnd_c`, 3 KB на `.vmdl_c`):
+
+```bat
+REM Шаг 1 — стабить все 160k+ тяжёлых ассетов (экономит ~7.6 GB реального чтения при загрузке)
+5_pak66_builder\strip_assets_pak66.bat all-safe
+
+REM Шаг 2 — добавить "-language minify" в Steam launch options
+5_pak66_builder\set_launch_option.bat
+```
+
+Точечный контроль по категориям (без пробелов между именами):
+
+```bat
+5_pak66_builder\strip_assets_pak66.bat vo,music
+5_pak66_builder\strip_assets_pak66.bat --list
+```
+
+Стакается с партикл-нуком и визуал-модами — `kill_particles_pak66` пишет
+`pak66_dir.vpk` с нуля, значит он идёт первым; `strip_assets_pak66 --merge`
+и `apply_mods --merge` потом расширяют тот же VPK:
+
+```bat
+5_pak66_builder\kill_particles_pak66.bat total
+5_pak66_builder\strip_assets_pak66.bat all-safe --merge
+6_minify_mods\apply_mods.bat all --merge
+5_pak66_builder\set_launch_option.bat
+```
+
+Результат: все партиклы стабы, все войсы/музыка/косметика/звуки
+атак стабы, все визуал-моды применены. **Цена:** герои молчат (нет
+войсов, нет звуков атак), косметика не рендерится — базовые модели
+героев / анимации / UI / механика спеллов работают.
+
 ### Откат
 
 ```bat

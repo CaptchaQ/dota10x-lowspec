@@ -33,6 +33,10 @@ The VPK we build can contain any combination of:
 - **Particle null-stubs** — replaces every (or only matched) `.vpcf_c` with
   Valve's empty 851-byte `null.vpcf_c`. Spell visuals disappear, gameplay is
   unaffected (cooldowns, damage, hitboxes, projectile travel time all normal).
+- **Asset stubs (load-time killer)** — replaces heavy categories beyond
+  particles (hero voice lines, music, attack sounds, cosmetic models) with
+  blank stubs. ~7 GB of assets become ~2 KB of stubs, which dramatically cuts
+  Dota 2's map load time. See [Cut map load time](#cut-map-load-time) below.
 - **Vendored minify mods** — a curated subset of the
   [dota2-minify](https://github.com/Egezenn/dota2-minify) mod catalog
   (see [Mods included](#mods-included) below).
@@ -74,8 +78,9 @@ dota10x-lowspec/
 ├── 2_particle_killer/           # Loose-file override path (legacy / unreliable)
 ├── 3_workshop_tools_path/       # Workshop Tools downscale/strip pipeline
 ├── 4_overrides_helpers/         # install/uninstall for the loose-file path
-├── 5_pak66_builder/             # ★ Particle nuke + Steam launch-option helper
-│   ├── kill_particles_pak66.{py,bat}    # builds dota_<locale>/pak66_dir.vpk
+├── 5_pak66_builder/             # ★ Particle/asset nukes + Steam launch-option helper
+│   ├── kill_particles_pak66.{py,bat}    # particle .vpcf_c -> null stubs
+│   ├── strip_assets_pak66.{py,bat}      # voice/music/cosmetics -> blank stubs (load-time)
 │   ├── set_launch_option.{py,bat}       # adds/removes -language <locale>
 │   └── uninstall_pak66.bat              # removes folder + launch option
 ├── 6_minify_mods/               # ★ Apply vendored minify mods into pak66
@@ -171,6 +176,59 @@ existing `dota_minify/` folder around or you already use minify itself.
 6_minify_mods\apply_mods.bat "Misc Optimization,Dark Terrain,Remove Foilage,Remove River"
 5_pak66_builder\set_launch_option.bat
 ```
+
+### Cut map load time
+
+Particles are not the heaviest thing Dota 2 loads. On a stock install
+`pak01_dir.vpk` contains:
+
+| Category | Files | Original size | Brick risk |
+|----------|-------|---------------|------------|
+| `sounds/vo/**/*.vsnd_c` (hero voice lines) | 91,020 | **3,773 MB** | safe |
+| `models/items/**/*.vmdl_c` (cosmetics) | 12,245 | **1,483 MB** | safe |
+| `sounds/music/**/*.vsnd_c` | 876 | **1,130 MB** | safe |
+| `sounds/weapons/**/*.vsnd_c` (attack sfx) | 2,639 | **792 MB** | safe |
+| `materials/models/items/**/*.vmat_c` | 13,317 | **131 MB** | safe |
+| `particles/econ/items/**/*.vpcf_c` | 39,945 | **102 MB** | safe |
+| `sounds/items/**/*.vsnd_c` | 184 | 81 MB | safe |
+| `sounds/ambient/**/*.vsnd_c` | 242 | 158 MB | safe |
+| **TOTAL `all-safe`** | **160,468** | **~7.6 GB** | safe |
+| `models/heroes/**` (base heroes) | 1,705 | 513 MB | **DO NOT** — game crashes |
+| `sounds/ui/**` | 556 | 153 MB | **DO NOT** — menu breaks |
+
+Replace every `all-safe` file with the minimal blank stub from
+`vendor/dota2-minify/blank-files/` (1.5 KB per `.vsnd_c`, 3 KB per `.vmdl_c`):
+
+```bat
+REM Step 1 — stub all 160k+ heavy assets (saves ~7.6 GB of disk reads at load)
+5_pak66_builder\strip_assets_pak66.bat all-safe
+
+REM Step 2 — add "-language minify" to Steam launch options
+5_pak66_builder\set_launch_option.bat
+```
+
+Finer-grained category control (no spaces between names):
+
+```bat
+5_pak66_builder\strip_assets_pak66.bat vo,music
+5_pak66_builder\strip_assets_pak66.bat --list
+```
+
+It stacks with the particle nuke and the visual mods — `kill_particles_pak66`
+writes a fresh `pak66_dir.vpk`, so it goes first; `strip_assets_pak66 --merge`
+and `apply_mods --merge` then layer onto the same VPK:
+
+```bat
+5_pak66_builder\kill_particles_pak66.bat total
+5_pak66_builder\strip_assets_pak66.bat all-safe --merge
+6_minify_mods\apply_mods.bat all --merge
+5_pak66_builder\set_launch_option.bat
+```
+
+Result: every particle stubbed, every voice line / music / cosmetic / attack
+sound stubbed, every visual mod applied. **Tradeoff:** heroes will be silent
+(no voice lines, no attack sounds) and cosmetic models render as nothing —
+base hero models / animations / UI / spell mechanics all still work.
 
 ### Uninstall
 
