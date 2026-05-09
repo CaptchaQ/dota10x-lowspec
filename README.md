@@ -189,15 +189,17 @@ images. `strip_assets_pak66` replaces them with minimal blank stubs from
 `vendor/dota2-minify/blank-files/` (1.5 KB per `.vsnd_c`, 3 KB per `.vmdl_c`,
 1×1 px per `.vtex_c`).
 
-There are **three tiers**, picking how aggressive you want to go. Each tier
+There are **five tiers**, picking how aggressive you want to go. Each tier
 includes everything from the previous one. Numbers are measured against a
 real `pak01_dir.vpk` (371,479 entries):
 
 | Bundle | Categories | Files stubbed | Original size | Visual cost |
 |---|---:|---:|---:|---|
-| **`all-safe`**       | 8  | 160,468 | ~7.6 GB | **none** — gameplay & UI identical |
+| **`all-safe`**       | 8  | 160,468 | ~7.6 GB  | **none** — gameplay & UI identical |
 | **`all-aggressive`** | 19 | 221,931 | ~37.6 GB | menu loses hero portraits / icons / loading-screen art; heroes still look normal in-game |
 | **`all-extreme`**    | 23 | 284,738 | ~55.6 GB | heroes / creeps / props render as flat error textures, but hitboxes / animations / HP bars / mechanics all work |
+| **`all-nuclear`**    | 32 | 288,361 | ~57.1 GB | + legacy Flash UI gone (~1.1 GB), event teaser videos, VS-screen models, couriers / pets / profile cards become placeholders. **No gameplay impact.** |
+| **`all-suicide`**    | 42 | 290,035 | ~58.3 GB | + 3D hero-pick previews, map textures, event-map content (Cavern Crawl, Reef Bender, Diretide). **Likely breaks event game modes / hero-pick UI.** |
 
 Pick one bundle (do **not** combine bundle names). Close Steam first, then:
 
@@ -212,6 +214,14 @@ REM Tier 2 — main menu loses portraits / icons
 
 REM Tier 3 — heroes are flat colors. Useful for headless 10-box bot farms.
 5_pak66_builder\strip_assets_pak66.bat all-extreme
+5_pak66_builder\set_launch_option.bat
+
+REM Tier 4 — also kills legacy Flash UI, event videos, VS-screen, couriers.
+5_pak66_builder\strip_assets_pak66.bat all-nuclear
+5_pak66_builder\set_launch_option.bat
+
+REM Tier 5 — also kills 3D hero-pick previews + event-map assets. May break events.
+5_pak66_builder\strip_assets_pak66.bat all-suicide
 5_pak66_builder\set_launch_option.bat
 ```
 
@@ -244,6 +254,38 @@ colors / checkerboards** during gameplay. The game is still 100 % playable —
 hitboxes, animations, HP bars, spell mechanics all work — but you literally
 cannot tell heroes apart by looking. Suitable for autopilot 10-box / bot
 farms / scripted account warming where you don't actually look at the screen.
+
+#### Tier 4 — `all-nuclear` (+9 categories, ~+1.5 GB)
+
+On top of `all-extreme`, also stubs:
+
+- `resource/flash3/` PNG assets (~1.14 GB) — legacy Flash UI replaced
+  long ago by Panorama; pure dead weight.
+- `scripts/workshop_import_templates/` (~98 MB) — dev-only Workshop
+  import templates.
+- `models/versus/` (~133 MB) — pre-match VS-screen models.
+- `materials/overlays/` (~85 MB) — terrain decals (Aegis logos, motifs).
+- `models/courier/` + `models/pets/` (~70 MB) — courier / pet models.
+- `materials/portraits_card/` (~35 MB) — profile portrait cards.
+
+**Tradeoff:** main menu loses some legacy banners and event teaser videos;
+couriers / pets become placeholders; pre-match VS-screen has no portraits.
+**Zero gameplay impact.**
+
+#### Tier 5 — `all-suicide` (+10 categories, ~+1.2 GB)
+
+On top of `all-nuclear`, also stubs:
+
+- `models/ui/` (~567 MB) — 3D hero-pick / loadout previews.
+- `materials/maps/` (~97 MB) — terrain texture atlas.
+- `materials/nature/` (~142 MB) — terrain nature decals.
+- `maps/{reef,cavern,jungle,journey,ti10}_assets/` (~410 MB) —
+  event-mode map content.
+
+**Tradeoff:** hero-pick / loadout previews are empty boxes; event modes
+(Cavern Crawl, Reef Bender, Diretide-style mini-games) may **fail to load
+or crash**. Use only if you don't play any event mode and don't care about
+3D hero previews.
 
 #### Finer-grained category control
 

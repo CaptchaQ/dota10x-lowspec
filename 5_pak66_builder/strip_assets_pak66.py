@@ -26,6 +26,14 @@ Categories
 * ``cosmetics-particles``: ``particles/econ/items/**/*.vpcf_c``
 * ``all-safe``          : every category above (the recommended
                           'cut load time' bundle - ~7 GB stubbed)
+* ``all-aggressive``    : Tier 1 + cosmetic / event content + UI textures
+                          (~30 GB stubbed - menu portraits/icons disappear)
+* ``all-extreme``       : Tier 2 + hero/creep/model textures
+                          (~55 GB stubbed - heroes are flat error colors)
+* ``all-nuclear``       : Tier 3 + legacy Flash UI + event teasers + VS
+                          screen + couriers + profile cards (~57 GB)
+* ``all-suicide``       : Tier 4 + 3D UI previews + map-textures + event-
+                          map assets (~58 GB - menu / event modes break)
 
 DO NOT USE these categories - they break the game:
 
@@ -105,6 +113,36 @@ CATEGORIES: dict[str, tuple[str, str]] = {
     "model-textures":      ("materials/models/",          "vtex_c"),  # ~14 GB - all model surfaces
     "creep-textures":      ("models/creeps/",             "vtex_c"),  # ~121 MB
     "unit-models":         ("models/creeps/",             "vmdl_c"),  # ~92 MB
+
+    # ---- TIER 4: nuclear (legacy / event UI bling) ----
+    # No gameplay impact. Visual side-effects are confined to the menu:
+    # legacy Flash dashboards (already replaced by Panorama), event
+    # teasers / intro videos, profile cards, and the pre-match VS screen.
+    "flash3-images":       ("resource/flash3/",           "png"),     # ~1.14 GB - legacy Flash UI .png assets
+    "workshop-templates":  ("scripts/workshop_import_templates/", "txt"),  # ~98 MB - dev-only Workshop templates
+    "versus-models":       ("models/versus/",             "vmdl_c"),  # part of ~133 MB - VS-screen models
+    "versus-textures":     ("models/versus/",             "vtex_c"),
+    "terrain-overlays":    ("materials/overlays/",        "vtex_c"),  # ~85 MB - decals (Aegis logos, motifs)
+    "courier-models":      ("models/courier/",            "vmdl_c"),  # part of ~53 MB
+    "courier-textures":    ("models/courier/",            "vtex_c"),
+    "profile-cards":       ("materials/portraits_card/",  "vtex_c"),  # ~35 MB - profile portrait cards
+    "pet-models":          ("models/pets/",               "vmdl_c"),  # ~16 MB - pet courier models
+
+    # ---- TIER 5: suicide (UI / map-textures / event-map content) ----
+    # Likely-visible breakage in the menu and on the map. Hero-pick /
+    # loadout previews can render as empty boxes; map-specific event
+    # modes (Cavern Crawl, Reef Bender, etc.) may crash or render as
+    # flat colors. Use only if you do not care about the menu or events.
+    "ui-models":           ("models/ui/",                 "vmdl_c"),  # ~567 MB - hero-pick / loadout 3D previews
+    "ui-textures":         ("models/ui/",                 "vtex_c"),
+    "map-textures":        ("materials/maps/",            "vtex_c"),  # ~97 MB - terrain texture atlas
+    "map-mats":            ("materials/maps/",            "vmat_c"),
+    "nature-textures":     ("materials/nature/",          "vtex_c"),  # ~142 MB - terrain nature decals
+    "event-maps-reef":     ("maps/reef_assets/",          "vtex_c"),  # ~107 MB
+    "event-maps-cavern":   ("maps/cavern_assets/",        "vtex_c"),  # ~104 MB
+    "event-maps-jungle":   ("maps/jungle_assets/",        "vtex_c"),  # ~76 MB
+    "event-maps-journey":  ("maps/journey_assets/",       "vtex_c"),  # ~74 MB
+    "event-maps-ti10":     ("maps/ti10_assets/",          "vtex_c"),  # ~69 MB
 }
 
 ALL_SAFE = [
@@ -122,10 +160,24 @@ ALL_EXTREME = ALL_AGGRESSIVE + [
     "hero-textures", "model-textures", "creep-textures", "unit-models",
 ]
 
+ALL_NUCLEAR = ALL_EXTREME + [
+    "flash3-images", "workshop-templates", "versus-models", "versus-textures",
+    "terrain-overlays", "courier-models", "courier-textures",
+    "profile-cards", "pet-models",
+]
+
+ALL_SUICIDE = ALL_NUCLEAR + [
+    "ui-models", "ui-textures", "map-textures", "map-mats", "nature-textures",
+    "event-maps-reef", "event-maps-cavern", "event-maps-jungle",
+    "event-maps-journey", "event-maps-ti10",
+]
+
 BUNDLES = {
     "all-safe":       ALL_SAFE,
     "all-aggressive": ALL_AGGRESSIVE,
     "all-extreme":    ALL_EXTREME,
+    "all-nuclear":    ALL_NUCLEAR,
+    "all-suicide":    ALL_SUICIDE,
 }
 
 # These are intentionally NOT user-selectable. They will brick the game.
