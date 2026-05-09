@@ -1,0 +1,140 @@
+# NUCLEAR preset: kills almost ALL particles for maximum FPS.
+# You will still see projectiles (you have to via gameplay markers), but everything else
+# will be muted. This is what bot farmers use for 10-15 instance setups.
+#
+# WARNING: spells that visually obscure the area (Smoke of Deceit, Razor Static Link)
+# will be invisible. You'll need to read combat log / minimap / state.
+
+# ---- Inherit aggressive ----
+particles/items_fx
+particles/items2_fx
+particles/items3_fx
+_ambient
+_idle
+_eyeglow
+_glow
+_loop
+portrait_
+econ_ambient
+arcana_ambient
+particles/world_environmental_fx
+particles/world_shrine
+particles/dire_fx
+particles/radiant_fx
+particles/generic_fx
+particles/water_splash
+particles/world_water
+particles/cliff_dust
+particles/courier
+particles/water/
+particles/fountain
+particles/fog_
+particles/clouds_
+particles/leaves_
+
+# ---- Spell secondary ----
+_trail
+_smoke
+_dust
+_screen
+_back_blur
+_charge_lvl
+_aura
+_aura_fx
+_buff
+_debuff
+_pulse
+_cast_fx
+_cast
+_cast_glow
+_overhead
+_lvl
+_lvlup
+_levelup
+_starfall_glow
+_burn_loop
+_blood
+_drips
+_chunks
+_gibs
+
+# ---- Hero PASSIVE/persistent visuals (mostly cosmetic) ----
+particles/units/heroes/hero_invoker/invoker_orb
+particles/units/heroes/hero_invoker/invoker_forged_spirit_attack
+particles/units/heroes/hero_zuus/zuus_arcana
+particles/units/heroes/hero_phoenix/phoenix_supernova
+particles/units/heroes/hero_phoenix/phoenix_fire
+particles/units/heroes/hero_legion_commander/legion_commander_press_the_attack
+particles/units/heroes/hero_warlock/warlock_golem_aoe
+particles/units/heroes/hero_techies/techies_remote_mine_radius
+particles/units/heroes/hero_jakiro/jakiro_macropyre
+particles/units/heroes/hero_disruptor/disruptor_kinetic_field
+particles/units/heroes/hero_winter_wyvern/winter_wyvern_arctic_burn
+particles/units/heroes/hero_disruptor/disruptor_static_storm
+
+# ---- Death / respawn / level / damage feedback ----
+_death
+_respawn
+_super_creep
+_killstreak
+_kill_streak
+_streak
+
+# ---- Damage numbers feedback (cosmetic) ----
+_overhead_text
+_overhead_fx
+_overhead_glow
+_overhead_msg
+
+# ---- Last-hit / deny / gold / xp visuals ----
+_lasthit
+_deny_
+_gold_pickup
+_bounty
+_runepickup
+
+# ---- Critical / bash / silvers / impact secondary ----
+_crit_
+_bash_
+_attack_proc
+
+# ---- Most ULT/spell secondaries from heaviest list ----
+omni_slash
+fire_remnant
+ravage
+freezing_field
+black_hole
+ice_path
+laguna
+ravage
+death_pulse
+chaos_meteor
+sun_strike
+rearm
+chrono
+stampede
+exorcism
+finger_of_death
+illuminate
+mass_serpent
+song_of_the_siren
+soulsteal
+charge_of_darkness
+ice_blast
+mystic_flare
+song_of_the_siren
+
+# ---- Trees / props ambient sway ----
+particles/units/heroes/hero_treant
+particles/items_fx/tree_
+
+# ---- Wards (cosmetic) ----
+particles/items2_fx/ward_
+
+# ---- Map ambient ----
+particles/dire_fx
+particles/radiant_fx
+particles/dire_river
+particles/radiant_river
+particles/river_pudge
+particles/river

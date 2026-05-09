@@ -1,0 +1,75 @@
+============================================================
+ Steam launch options for Dota 2 (low-spec / 10 instances)
+ Right-click Dota 2 in Steam -> Properties -> Launch Options
+============================================================
+
+Recommended single line (copy-paste):
+-----------------------------------------------------------------
+-novid -nojoy -nopreload -nopreloadmodels -high -map_quality_low +exec autoexec +fps_max 120 -dx11 -no_browser -nominidumps -nopreload -threads 4 -windowed -noborder -high
+-----------------------------------------------------------------
+
+What each does:
+  -novid                  skip intro
+  -nojoy                  no controller init (small mem saving)
+  -nopreload              don't preload all assets
+  -nopreloadmodels        don't preload models -- big VRAM saver
+  -map_quality_low        lower map quality
+  +exec autoexec          execute autoexec.cfg every launch
+  +fps_max 120            hard cap (override autoexec if needed)
+  -dx11                   force DX11 (lower CPU overhead than Vulkan for older GPUs)
+                          (try removing this; Vulkan is sometimes faster on modern systems)
+  -no_browser             disable in-client web browser (memory hog)
+  -nominidumps            don't write minidumps
+  -threads 4              limit engine threads (helps when running many copies)
+  -windowed -noborder     borderless window (easier multi-boxing layout)
+  -high                   high process priority (only set this on the focused/active client; 
+                          if you set it on all 10, scheduling will fight)
+
+============================================================
+ Multi-instance setup (running 10 copies)
+============================================================
+
+You CANNOT launch 10 copies through Steam directly.  Two options:
+
+  A) Sandboxie-Plus (free) - run each Dota in its own sandbox + Steam.
+  B) Multiple Windows accounts + Steam family.
+
+The cheap way (used by smurf farmers): run each copy via:
+   "C:\Path\To\Steam\steamapps\common\dota 2 beta\game\bin\win64\dota2.exe" -gameid 570 -con_enable -insecure (your launch options)
+After all clients are open, ALT-TAB out of all but the active one.
+
+CRITICAL multi-instance settings (already in autoexec.cfg):
+   snd_mute_losefocus 1     -- only focused client plays sound
+   engine_no_focus_sleep 50 -- background clients sleep 50ms/frame  -> CPU drops dramatically
+
+============================================================
+ In-game settings (set these on every client)
+============================================================
+Video tab:
+  - Renderer:         DX11 (or Vulkan, test both)
+  - Resolution:       lowest acceptable for you (e.g. 1280x720)
+  - Aspect:           16:9
+  - Fullscreen:       Borderless windowed (for multi-instance)
+  - Use advanced settings:  ON, then set every slider to LEFTMOST / OFF:
+      Game Screen Render Quality: 60-80%
+      Texture Quality:            Low
+      Effects Quality:            Low
+      Shadow Quality:             Low / disabled
+      Maximum Frames Per Second:  60-90 (set lower per instance)
+      Animate Portrait:           OFF
+      Additive Light Pass:        OFF
+      World Lighting:             OFF
+      Specular:                   OFF
+      Specular & Light Blooms:    OFF
+      Normal Maps:                OFF
+      Ambient Creatures:          OFF
+      High-Quality Water:         OFF
+      Atmospheric Fog:            OFF
+      Tree Wave / Bloom / etc:    OFF
+      Vsync:                      OFF
+      Render API:                 DX11
+      Anti-Aliasing:              OFF
+      Anisotropic Filtering:      Trilinear
+      Color Correction:           OFF
+      Particles & Shaders:        Low
+      Texture Streaming:          OFF (or ON if VRAM is the bottleneck)

@@ -1,0 +1,47 @@
+# Top 300 entries
+# format: <bytes> <full_path>
+
+  67109880  materials/skybox/tests/src/lightingtest_interior_basic_mirrored_exr_d8c72956.vtex_c
+  33555360  materials/skybox/sky_secretshop_pano_psd_bab52b01.vtex_c
+   5594404  materials/skybox/skycard_10th_anniversary_psd_9d5a04c5.vtex_c
+   5594372  materials/skybox/sky_versus_ti10_underlord_halfdome_psd_30edb62f.vtex_c
+   5594308  materials/skybox/sky_command_night_1_png_8f7e09ac.vtex_c
+   4195000  materials/skybox/sky_command_night_png_8291e347.vtex_c
+   4194984  materials/skybox/sky_dota_001_psd_9283b306.vtex_c
+   1399924  materials/skybox/sky_command_night_png_cfb91fbf.vtex_c
+   1399924  materials/skybox/sky_dota_003_0_psd_5a346cdc.vtex_c
+   1399908  materials/skybox/sky_dota_003_psd_c20925f2.vtex_c
+   1399908  materials/skybox/sky_dota_003_psd_e66d441d.vtex_c
+   1399876  materials/skybox/sky_ti9_psd_a7b0ac19.vtex_c
+   1049480  materials/skybox/sky_snapfire_001_psd_75c58c97.vtex_c
+   1049304  materials/skybox/sky_underlord_debut_001_psd_ad9f40af.vtex_c
+   1049256  materials/skybox/sky_dota_000_psd_ceb026ce.vtex_c
+   1049256  materials/skybox/sky_dota_002_psd_8ad2c9bb.vtex_c
+   1049256  materials/skybox/sky_dota_003_psd_81ea1864.vtex_c
+   1049256  materials/skybox/sky_dota_004_psd_630b7b57.vtex_c
+   1049256  materials/skybox/sky_dota_005_psd_c5980e1f.vtex_c
+   1049256  materials/skybox/sky_dota_006_psd_67a9de4f.vtex_c
+    700828  materials/skybox/sky_darkmoon_01up_mask_psd_7a36b5ee.vtex_c
+    700812  materials/skybox/sky_winter_01up_color_psd_b4da009f.vtex_c
+    176540  materials/skybox/sky_darkmoon_01up_color_psd_d7eefd6.vtex_c
+     12764  materials/skybox/sky_dotasky_01up_color_tga_350f16d0.vtex_c
+     12700  materials/skybox/sky_dotasky_01bk_color_tga_18006d8c.vtex_c
+     12700  materials/skybox/sky_dotasky_01ft_color_tga_dd700831.vtex_c
+     12700  materials/skybox/sky_dotasky_01lf_color_tga_a2e4843a.vtex_c
+     12700  materials/skybox/sky_dotasky_01rt_color_tga_b44b14c8.vtex_c
+     12700  materials/skybox/sky_dotasky_01up_color_tga_33b6f488.vtex_c
+     12700  materials/skybox/sky_dotasky_02bk_color_tga_23dc111c.vtex_c
+     12700  materials/skybox/sky_dotasky_02ft_color_tga_c4a4c711.vtex_c
+     12700  materials/skybox/sky_dotasky_02lf_color_tga_cca07aa4.vtex_c
+     12700  materials/skybox/sky_dotasky_02rt_color_tga_9e1965.vtex_c
+     12700  materials/skybox/sky_dotasky_02up_color_tga_f9b9d849.vtex_c
+     12700  materials/skybox/sky_dotasky_03bk_color_tga_7fb24003.vtex_c
+     12700  materials/skybox/sky_dotasky_03ft_color_tga_e783192.vtex_c
+     12700  materials/skybox/sky_dotasky_03lf_color_tga_c86f18aa.vtex_c
+     12700  materials/skybox/sky_dotasky_03rt_color_tga_5cf4e0c.vtex_c
+     12700  materials/skybox/sky_dotasky_03up_color_tga_ea9c3343.vtex_c
+     12700  materials/skybox/sky_tintable_01bk_color_psd_fdeb88b9.vtex_c
+     12700  materials/skybox/sky_tintable_01lf_color_psd_eff1f40f.vtex_c
+     12700  materials/skybox/sky_tintable_01rt_color_psd_ae476f54.vtex_c
+     12700  materials/skybox/sky_tintable_01up_color_psd_6eacc1df.vtex_c
+       760  materials/skybox/sky_cavern_001_psd_355c04f1.vtex_c
