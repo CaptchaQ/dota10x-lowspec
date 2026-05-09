@@ -47,6 +47,8 @@ options на `-language minify`, чтобы Dota 2 эту папку подхв�
 
 | Мод | Что делает | Автор оригинала |
 |-----|------------|-----------------|
+| **Minify Spells & Items** | заменяет ~5,400 вручную отобранных партиклов спеллов/предметов на пустые стабы (это и есть «канонический» список отключения партиклов из minify) | [Egezenn](https://github.com/Egezenn) |
+| **Minify Base Attacks** | заменяет ~250 вручную отобранных партиклов базовых атак на пустые стабы | [Egezenn](https://github.com/Egezenn) |
 | Misc Optimization | широкий cvar-pack + сотни ambient-партикл-стабов | [robbyz512](https://github.com/robbyz512) |
 | Dark Terrain | тёмный/чёрный террейн, меньше визуального шума | [robbyz512](https://github.com/robbyz512) |
 | Remove Foilage | убирает траву и деревья | [robbyz512](https://github.com/robbyz512) |
@@ -94,17 +96,37 @@ dota10x-lowspec/
   первом запуске)
 - ~100 МБ свободного места под `pak66_dir.vpk`
 
-### Один проход: партикл-килл + все моды (рекомендуется)
+### Два способа отключить партиклы
+
+Проект поддерживает **оба** подхода minify:
+
+1. **Курированный список (рекомендуется, 1-в-1 как в minify)**:
+   новые моды `Minify Spells & Items` и `Minify Base Attacks` — это
+   вручную подобранные блэклисты на ~5,600 партикл-путей, именно
+   их использует сам minify. Каждый путь в списке — реальный файл
+   в `pak01_dir.vpk`, поэтому оверрайд гарантированно срабатывает.
+   Визуал спеллов/предметов/базовых атак исчезает, ambient/UI
+   партиклы остаются.
+2. **Нук-по-паттерну**: старый `kill_particles_pak66.bat` проходит
+   по всем `.vpcf_c` в `pak01_dir.vpk` и стабит те, что совпадают с
+   substring-паттернами пресета. «Ядерный» вариант (пресет
+   `total` стабит все ~80,700 `.vpcf_c`).
+
+### Один проход: все моды + полный партикл-килл (рекомендуется)
 
 **Закрой Steam перед запуском** (иначе Steam перезапишет launch options).
 Потом из обычного CMD/PowerShell:
 
 ```bat
-REM Шаг 1 — собрать dota_minify\pak66_dir.vpk: моды + полный партикл-килл
+REM Шаг 1 — собрать dota_minify\pak66_dir.vpk: все моды
+РЕМ (включая Minify Spells & Items + Minify Base Attacks)
+6_minify_mods\apply_mods.bat all
+
+REM Шаг 2 — (опционально) добавить «ядерный» нук по паттерну на весь остальной ambient/UI визуал
 6_minify_mods\apply_mods.bat all --merge
 5_pak66_builder\kill_particles_pak66.bat total
 
-REM Шаг 2 — добавить "-language minify" в Steam launch options Dota 2
+REM Шаг 3 — добавить "-language minify" в Steam launch options Dota 2
 5_pak66_builder\set_launch_option.bat
 ```
 
@@ -114,6 +136,13 @@ REM Шаг 2 — добавить "-language minify" в Steam launch options Dot
 
 Пресеты `kill_particles`: `safe` (~19,700), `aggressive` (~30,400),
 `nuclear` (~39,400), `total` (~80,700 — все).
+
+Если хочется **только** отключения партиклов «как в minify»:
+
+```bat
+6_minify_mods\apply_mods.bat "Minify Spells & Items,Minify Base Attacks"
+5_pak66_builder\set_launch_option.bat
+```
 
 Название локали меняется флагом `--locale <name>` у любого скрипта
 (по умолчанию: `minify`). Свою локаль имеет смысл задать, только если

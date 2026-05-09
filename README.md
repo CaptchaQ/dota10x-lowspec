@@ -48,6 +48,8 @@ attribution to original mod authors.
 
 | Mod | Effect | Original author |
 |-----|--------|-----------------|
+| **Minify Spells & Items** | replaces ~5,400 hand-curated spell/item particles with blank stubs (the canonical “disable particles” list from minify) | [Egezenn](https://github.com/Egezenn) |
+| **Minify Base Attacks** | replaces ~250 hand-curated base-attack particles with blank stubs | [Egezenn](https://github.com/Egezenn) |
 | Misc Optimization | broad cvar pack + hundreds of ambient particle blanks | [robbyz512](https://github.com/robbyz512) |
 | Dark Terrain | dark/black terrain, reduces visual noise | [robbyz512](https://github.com/robbyz512) |
 | Remove Foilage | removes grass and trees | [robbyz512](https://github.com/robbyz512) |
@@ -96,17 +98,35 @@ dota10x-lowspec/
   first run if missing)
 - ~100 MB free disk for `pak66_dir.vpk`
 
-### One-shot: kill every particle + apply all mods (recommended)
+### Two ways to disable particles
+
+This project ships **both** of minify's particle-disable approaches:
+
+1. **Curated list (recommended, identical to minify):** the new
+   `Minify Spells & Items` and `Minify Base Attacks` mods ship hand-picked
+   blacklists of ~5,600 particle paths that minify itself uses. Every entry
+   is a real path that exists in `pak01_dir.vpk`, so the override is
+   guaranteed to bind. Visuals for spells / items / base attacks disappear,
+   ambient and UI particles stay.
+2. **Pattern-matching wildcard nuke:** the older `kill_particles_pak66.bat`
+   matches every `.vpcf_c` in `pak01_dir.vpk` against substring patterns and
+   stubs them out. This is the “nuclear” option (`total` preset stubs all
+   ~80,700 `.vpcf_c` files).
+
+### One-shot: apply all mods + total particle nuke (recommended)
 
 Close Steam first (required so Steam doesn't overwrite your launch options),
 then run from a normal CMD/PowerShell:
 
 ```bat
-REM Step 1 – build dota_minify\pak66_dir.vpk with all mods + total particle nuke
+REM Step 1 – build dota_minify\pak66_dir.vpk with all mods (incl. Spells/Items + Base Attacks)
+6_minify_mods\apply_mods.bat all
+
+REM Step 2 – (optional) extend it with the total wildcard nuke for ambient/UI particles too
 6_minify_mods\apply_mods.bat all --merge
 5_pak66_builder\kill_particles_pak66.bat total
 
-REM Step 2 – add "-language minify" to Dota 2 Steam launch options
+REM Step 3 – add "-language minify" to Dota 2 Steam launch options
 5_pak66_builder\set_launch_option.bat
 ```
 
@@ -116,6 +136,13 @@ trails, dark terrain, no river, no weather, no menu hero renders. Gameplay
 
 Kill-particles presets: `safe` (~19,700), `aggressive` (~30,400),
 `nuclear` (~39,400), `total` (~80,700 – all).
+
+If you only want minify-style particle disabling (skip the rest):
+
+```bat
+6_minify_mods\apply_mods.bat "Minify Spells & Items,Minify Base Attacks"
+5_pak66_builder\set_launch_option.bat
+```
 
 The locale name is configurable via `--locale <name>` on every script
 (default: `minify`). Use a different locale only if you want to keep an

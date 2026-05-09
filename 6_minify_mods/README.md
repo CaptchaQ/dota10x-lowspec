@@ -15,6 +15,8 @@ apply_mods.bat --list
 
 | Mod | Mechanism | Effect |
 |-----|-----------|--------|
+| **Minify Spells & Items** | blacklist (~5,400 paths) | replaces spell/item particles with blank stubs (the canonical "disable particles" list from minify itself) |
+| **Minify Base Attacks** | blacklist (~250 paths) | replaces base-attack particles with blank stubs |
 | Misc Optimization | blacklist | broad cvar pack + ambient particle blanks |
 | Dark Terrain | blacklist + files/ | dark/black terrain (depends on Remove Foilage) |
 | Remove Foilage | blacklist | removes grass and trees |
@@ -24,6 +26,16 @@ apply_mods.bat --list
 | Mute Ambient Sounds | blacklist | mutes wind, water, etc. |
 | Remove Hero Renders | css | requires Workshop Tools (skipped by CLI) |
 | Remove Showcases | css | requires Workshop Tools (skipped by CLI) |
+
+### How particle disabling works
+
+The two `Minify *` mods are minify's own hand-curated lists of particle paths.
+Each line in their `blacklist.txt` is a real `.vpcf_c` path that exists in
+`pak01_dir.vpk`; we stage a blank `.vpcf_c` stub at every one of those paths
+and pack the result into `pak66_dir.vpk`. When Source 2 mounts
+`dota_<locale>/pak66_dir.vpk` after `pak01`, the blank stubs win and the
+particles render as nothing. This is exactly the same mechanism (and the same
+files) that minify itself ships.
 
 ## Usage
 
@@ -37,18 +49,21 @@ apply_mods.bat "Misc Optimization,Dark Terrain,Remove River"
 REM 3) Dry run (don't write any VPK).
 apply_mods.bat all --dry-run
 
-REM 4) Combine with kill_particles_pak66 for a fully-optimized pak66.
-REM    Order matters — build particle nuke first, then merge mods on top.
-apply_mods.bat all --merge
+REM 4) Particle disabling “as in minify” only (no other visual mods).
+apply_mods.bat "Minify Spells & Items,Minify Base Attacks"
+
+REM 5) Combine with kill_particles_pak66 for a fully-optimized pak66.
+REM    Order matters — build mods first, then merge wildcard nuke on top.
+apply_mods.bat all
 ..\5_pak66_builder\kill_particles_pak66.bat total
 
-REM 5) Use a different language folder (e.g. dota_russian\).
+REM 6) Use a different language folder (e.g. dota_russian\).
 apply_mods.bat all --locale russian
 
-REM 6) Activate the override in Steam (must be done once after building).
+REM 7) Activate the override in Steam (must be done once after building).
 ..\5_pak66_builder\set_launch_option.bat
 
-REM 7) Remove dota_minify\ entirely (without touching launch options).
+REM 8) Remove dota_minify\ entirely (without touching launch options).
 apply_mods.bat --uninstall
 ```
 
