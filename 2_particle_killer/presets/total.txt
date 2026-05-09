@@ -1,0 +1,18 @@
+# total.txt - KILL EVERYTHING
+# ============================================================
+# Matches EVERY particle in the VPK. Nothing visual remains:
+# - no projectiles (you won't see arrows, hookshots, blink trails)
+# - no spell vfx
+# - no auras / portraits / item glows
+# - no map ambient (fountain fire, fireflies, water ripples)
+# - no death / respawn / level up effects
+# - no blood / decals / impact sparks
+#
+# Use this only for absolute bot-farm / 10-box scenarios where
+# visuals genuinely don't matter. You can still play, hitboxes
+# and gameplay are unaffected, but you will literally see no fx.
+#
+# To partially restore: use aggressive.txt or nuclear.txt instead.
+# To fully restore: run 4_overrides_helpers/uninstall.bat
+# ============================================================
+particles/

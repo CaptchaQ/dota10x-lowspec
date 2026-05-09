@@ -1,0 +1,43 @@
+[project]
+name = "dota10x-lowspec"
+version = "0.1.0"
+description = "Dota 2 client-side optimizer for multi-instance / 10-box setups"
+readme = "README.md"
+requires-python = ">=3.7"
+license = { text = "GPL-3.0-or-later" }
+authors = [
+    { name = "CaptchaQ" },
+]
+keywords = ["dota2", "vpk", "optimization", "low-spec", "multi-box"]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Games/Entertainment",
+]
+
+dependencies = [
+    "vpk>=1.4.0",
+    "pillow>=9.0.0",
+    # vdf is needed by 5_pak66_builder/set_launch_option.py to parse and
+    # rewrite Steam's localconfig.vdf (adds/removes "-language <locale>").
+    "vdf>=3.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/CaptchaQ/dota10x-lowspec"
+Issues = "https://github.com/CaptchaQ/dota10x-lowspec/issues"
+"Upstream (dota2-minify)" = "https://github.com/Egezenn/dota2-minify"
+
+[tool.ruff]
+line-length = 100
+target-version = "py37"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

@@ -1,0 +1,67 @@
+# SAFE preset: kills purely cosmetic / ambient effects.
+# Gameplay-relevant particles (projectiles, damage indicators, range markers) are kept.
+# Lines starting with '#' are comments. Lines are case-insensitive substring patterns.
+# Each pattern is matched against the full path (e.g. particles/units/heroes/hero_juggernaut/juggernaut_omni_dash.vpcf_c).
+
+# ---- Generic cosmetic noise ----
+particles/items_fx/aegis_respawn
+particles/items_fx/wraith_band
+particles/items_fx/wraith_band_owner
+particles/items_fx/treads
+particles/items_fx/phaseboots
+particles/items_fx/powertreads
+particles/items_fx/talisman_of_evasion
+particles/items_fx/blink_dagger_start
+particles/items_fx/sange
+particles/items_fx/yasha
+particles/items_fx/heart_buff
+particles/items_fx/heart_pulse
+particles/items_fx/manta
+particles/items_fx/black_king_bar_avatar
+particles/items_fx/aether_lens
+particles/items_fx/satanic_buff
+particles/items_fx/butterfly
+particles/items_fx/dragon_lance
+
+# ---- Hero ambient / passive cosmetic ----
+_ambient
+_passive_eyeglow
+_eyeglow
+_idle
+_loop_cosmetic
+portrait_
+hero_glow
+econ_ambient
+arcana_ambient
+
+# ---- Map cosmetic ----
+particles/world_environmental_fx
+particles/world_shrine
+particles/dire_fx
+particles/radiant_fx
+particles/generic_fx/fire
+particles/generic_fx/torch
+particles/generic_fx/smoke
+particles/generic_fx/dust
+particles/water_splash
+particles/world_water
+particles/cliff_dust
+particles/courier
+particles/generic_gameplay/dropped_item
+
+# ---- Death / respawn / level up cosmetics ----
+_death_glow
+_respawn_glow
+_level_up
+_levelup
+_super_creep_birth
+
+# ---- Wards (cosmetic only - not the vision area) ----
+particles/items2_fx/ward_sentry_idle
+particles/items2_fx/ward_observer_idle
+particles/units/heroes/hero_techies/techies_minefield_sign
+
+# ---- Critical-hit blood splatters (cosmetic) ----
+_blood_impact
+_blood_splatter
+_critical_blood
