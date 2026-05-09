@@ -107,6 +107,34 @@ dota10x-lowspec/
   first run if missing)
 - ~100 MB free disk for `pak66_dir.vpk`
 
+### Easiest way: the GUI (`dota10x_gui.bat`)
+
+If you prefer click-to-build over typing CLI commands, double-click
+**`dota10x_gui.bat`** at the repo root. It auto-detects Python, auto-installs
+`vpk` + `vdf` on first run, then opens a small window where you can:
+
+- Pick the **particle preset** (off / safe / aggressive / total).
+- Pick the **asset-strip bundle** (off / all-safe / all-aggressive /
+  all-extreme / all-nuclear / all-suicide).
+- Pick **visual mods** — either tick "Apply all available mods" or pick
+  individually. Mods that need Workshop Tools (CSS compilation) are shown
+  greyed out so you don't accidentally pick something that won't take effect.
+- Toggle **auto-set Steam launch option** (`-language <locale>`).
+
+Then hit **Build pak66**. The GUI runs the four scripts in the right order
+(particles → assets → mods → launch flag), passing `--merge` automatically
+from step 2 onwards so each step adds to the same `pak66_dir.vpk` instead of
+overwriting it. Output streams live to the log pane. **Uninstall** removes
+the language-overlay folder and drops `-language <locale>` from launch
+options.
+
+> Steam must be CLOSED before you click Build / Uninstall — otherwise Steam
+> overwrites `localconfig.vdf` on exit and the launch flag edit is lost.
+
+The GUI is just a frontend — it calls the same `5_pak66_builder/` and
+`6_minify_mods/` scripts described below, with the same arguments. Use the
+CLI directly if you prefer scripting.
+
 ### Two ways to disable particles
 
 This project ships **both** of minify's particle-disable approaches:
