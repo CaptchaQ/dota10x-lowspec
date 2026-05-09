@@ -1,7 +1,14 @@
 r"""apply_mods.py
 ==============================================================
-Builds (or extends) `pak66_dir.vpk` next to `pak01_dir.vpk` by
+Builds (or extends) ``pak66_dir.vpk`` inside
+``<dota>/game/dota_<locale>/`` (default locale: ``minify``) by
 applying selected vendored dota2-minify mods.
+
+The target folder is mounted by Dota 2 only when Steam launch
+options contain ``-language <locale>``. This is the same
+mechanism dota2-minify uses (it edits ``localconfig.vdf`` to
+add ``-language minify`` automatically). To turn the override
+off, simply remove ``-language <locale>`` from launch options.
 
 Each mod can contribute via two mechanisms:
 
@@ -40,11 +47,17 @@ USAGE
     #   2) then run this with --merge to extend it instead of overwrite
     python apply_mods.py --mods all --merge
 
+    # Use a different locale folder name (must match -language X in Steam)
+    python apply_mods.py --mods all --locale russian
+
     # List all available mods
     python apply_mods.py --list
 
-After running, restart Dota 2.
-To uninstall: delete ``<dota>/game/dota/pak66_dir.vpk``.
+    # Remove the entire dota_<locale>/ folder
+    python apply_mods.py --uninstall
+
+After running, add ``-language <locale>`` to Dota 2 launch options
+in Steam (Properties -> Launch Options) and restart the game.
 """
 from __future__ import annotations
 
@@ -317,12 +330,19 @@ def main() -> int:
     ap.add_argument("--mods", default="all",
                     help='Comma-separated mod names, or "all". Use --list to see options.')
     ap.add_argument("--list", action="store_true", help="List available mods and exit.")
+    ap.add_argument("--locale", default="minify",
+                    help="Output language folder name. The VPK is written into "
+                         "<dota>/game/dota_<locale>/. Steam launch options must "
+                         "contain '-language <locale>' for the override to mount. "
+                         "Default: 'minify'.")
     ap.add_argument("--pak-number", type=int, default=66,
                     help="VPK number to write (must be 2-99). Default 66.")
     ap.add_argument("--merge", action="store_true",
                     help="If pak66_dir.vpk already exists, unpack it into staging "
                          "and add new mod files on top. Otherwise pak66 is overwritten.")
     ap.add_argument("--dry-run", action="store_true", help="Print what WOULD happen, write nothing.")
+    ap.add_argument("--uninstall", action="store_true",
+                    help="Remove <dota>/game/dota_<locale>/ entirely and exit.")
     args = ap.parse_args()
 
     available = list_available_mods()
@@ -370,16 +390,35 @@ def main() -> int:
         print("ERROR: --pak-number must be between 2 and 99")
         return 1
 
+    if not args.locale or "/" in args.locale or "\\" in args.locale:
+        print("ERROR: --locale must be a single folder name (no slashes)")
+        return 1
+
     # --- locate Dota
     dota = args.dota or find_dota_install()
     if not dota:
         print("ERROR: Could not locate Dota 2 install. Pass --dota <path>")
         return 1
+    print(f"[+] Dota 2 install: {dota}")
+
+    locale_dir = dota / "game" / f"dota_{args.locale}"
+
+    # --uninstall does not need pak01_dir.vpk to be present; let users
+    # clean up even if Dota was uninstalled or the pak is broken.
+    if args.uninstall:
+        if locale_dir.exists():
+            print(f"[+] Removing {locale_dir} ...")
+            if not args.dry_run:
+                shutil.rmtree(locale_dir)
+            print(f"[+] Done. You can also remove '-language {args.locale}' from Steam launch options.")
+        else:
+            print(f"[+] Nothing to remove at {locale_dir}")
+        return 0
+
     pak_dir_path = dota / "game" / "dota" / "pak01_dir.vpk"
     if not pak_dir_path.exists():
         print(f"ERROR: pak01_dir.vpk not found under {dota}")
         return 1
-    print(f"[+] Dota 2 install: {dota}")
     print(f"[+] VPK index:      {pak_dir_path}")
 
     # --- parse VPK
@@ -397,7 +436,9 @@ def main() -> int:
 
     # --- compute final action plan
     pak_name = f"pak{args.pak_number:02d}_dir.vpk"
-    out_path = dota / "game" / "dota" / pak_name
+    out_path = locale_dir / pak_name
+    locale_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[+] Output folder:  {locale_dir}")
 
     # --- stage and build
     if args.dry_run:
@@ -459,8 +500,11 @@ def main() -> int:
     print(f"  Size:         {size / 1024 / 1024:.2f} MB")
     print(f"  Entries:      {total_blank + total_override:,}")
     print("=" * 60)
-    print("  Restart Dota 2 for changes to take effect.")
-    print(f"  To revert:    delete {pak_name}")
+    print(f"  REQUIRED: add '-language {args.locale}' to Dota 2 launch options:")
+    print("    Steam -> Library -> Dota 2 -> right-click -> Properties -> Launch Options")
+    print("    Or run set_launch_option.bat (5_pak66_builder/) to do it automatically.")
+    print("  Then restart Dota 2.")
+    print(f"  To revert:    rerun with --uninstall (or delete {locale_dir})")
     return 0
 
 

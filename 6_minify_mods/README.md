@@ -1,7 +1,11 @@
 # 6_minify_mods — vendored dota2-minify mods
 
 Applies a curated subset of [dota2-minify](https://github.com/Egezenn/dota2-minify)
-mods to `<dota>/game/dota/pak66_dir.vpk`. CLI-only.
+mods into `<dota>/game/dota_<locale>/pak66_dir.vpk` (default locale:
+`minify`, configurable via `--locale`). The folder is only mounted by Dota 2
+when Steam launch options contain `-language <locale>` — use
+[`../5_pak66_builder/set_launch_option.bat`](../5_pak66_builder/set_launch_option.bat)
+to add it. CLI-only.
 
 ## Available mods
 
@@ -24,7 +28,7 @@ apply_mods.bat --list
 ## Usage
 
 ```bat
-REM 1) Apply every supported mod (default).
+REM 1) Apply every supported mod (default; writes dota_minify\pak66_dir.vpk).
 apply_mods.bat
 
 REM 2) Apply specific mods (comma-separated).
@@ -34,13 +38,32 @@ REM 3) Dry run (don't write any VPK).
 apply_mods.bat all --dry-run
 
 REM 4) Combine with kill_particles_pak66 for a fully-optimized pak66.
-..\5_pak66_builder\kill_particles_pak66.bat total
+REM    Order matters — build particle nuke first, then merge mods on top.
 apply_mods.bat all --merge
+..\5_pak66_builder\kill_particles_pak66.bat total
+
+REM 5) Use a different language folder (e.g. dota_russian\).
+apply_mods.bat all --locale russian
+
+REM 6) Activate the override in Steam (must be done once after building).
+..\5_pak66_builder\set_launch_option.bat
+
+REM 7) Remove dota_minify\ entirely (without touching launch options).
+apply_mods.bat --uninstall
 ```
 
 `--merge` unpacks the existing `pak66_dir.vpk` into staging before adding new
 mod files, so particle stubs from `kill_particles_pak66.py` and minify mod
 overrides end up in the same VPK.
+
+### After running this script
+
+1. Run `..\5_pak66_builder\set_launch_option.bat` — this adds
+   `-language minify` to your Dota 2 launch options (it requires Steam to be
+   closed because Steam rewrites `localconfig.vdf` on exit).
+2. Restart Steam, launch Dota 2. Source 2 will mount
+   `<dota>/game/dota_minify/` as a language overlay **on top of** the base
+   game, so the override always wins.
 
 ## Uninstall
 
@@ -50,7 +73,12 @@ Same as everything else in this repo:
 ..\5_pak66_builder\uninstall_pak66.bat
 ```
 
-Or manually delete `<dota>\game\dota\pak66_dir.vpk`.
+This removes `<dota>\game\dota_minify\` and (after a confirmation) drops
+`-language minify` from your Steam launch options.
+
+Manual uninstall: just delete `<dota>\game\dota_minify\` and remove
+`-language minify` from Dota 2's Steam launch options. The base `game/dota/`
+is never touched, so Steam's "Verify integrity of game files" stays clean.
 
 ## Workshop-Tools mods (CSS)
 

@@ -2,17 +2,25 @@
 setlocal
 REM ============================================================
 REM  kill_particles_pak66.bat
-REM  Builds pak66_dir.vpk next to pak01_dir.vpk and overrides
-REM  every preset-matched particle with Valve's null stub.
+REM  Builds pak66_dir.vpk inside <dota>\game\dota_minify\ that
+REM  overrides every preset-matched particle with Valve's null
+REM  stub. The folder is only mounted by Dota 2 when Steam launch
+REM  options contain "-language minify".
 REM
-REM  Why pak66: Source 2 mounts every pak*_dir.vpk in numerical
-REM  order, so pak66 wins over pak01 for the same paths. This
-REM  is the same approach the popular dota2-minify uses.
-REM  Loose-file overrides sometimes don't take effect on user
-REM  installations - this VPK approach bypasses that.
+REM  Why dota_<locale>/ instead of dota/: putting the override
+REM  in a language overlay folder bypasses Steam's "verify
+REM  integrity of game files" (which would delete a non-vanilla
+REM  pak in dota/), and Source 2 mounts language overlays AFTER
+REM  the base, so the override is guaranteed to win. This is the
+REM  same approach dota2-minify uses.
+REM
+REM  After this script:
+REM    1. Run set_launch_option.bat (or add "-language minify"
+REM       manually in Steam -> Properties -> Launch Options).
+REM    2. Restart Steam + Dota 2.
 REM ============================================================
 
-REM Default preset; pass as arg to override:
+REM Default preset; pass as first arg to override:
 REM    kill_particles_pak66.bat safe        (~19,700 particles)
 REM    kill_particles_pak66.bat aggressive  (~30,400 particles)
 REM    kill_particles_pak66.bat nuclear     (~39,400 particles)

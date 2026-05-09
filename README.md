@@ -10,11 +10,23 @@ A Dota 2 client-side optimizer focused on running multiple instances simultaneou
 
 ## What this does
 
-Builds a side-loaded VPK archive (`pak66_dir.vpk`) that gets mounted alongside
-Valve's `pak01_dir.vpk`. Source 2 mounts every `pak*_dir.vpk` in numerical order,
-so `pak66` overrides `pak01` for the same asset paths. This is the same mechanism
-that the well-known [dota2-minify](https://github.com/Egezenn/dota2-minify) project
-uses, and that this project borrows several mods from.
+Builds a side-loaded VPK archive (`pak66_dir.vpk`) inside a **language-overlay
+folder** (`<dota>/game/dota_minify/`, by default), then flips the Steam launch
+options for Dota 2 to include `-language minify` so the game mounts that folder.
+
+This is the exact same mechanism the well-known
+[dota2-minify](https://github.com/Egezenn/dota2-minify) project uses, and that
+this project borrows several mods from. Why not put the VPK directly into
+`game/dota/`? Two reasons:
+
+1. **Steam's "Verify integrity of game files"** wipes any non-vanilla pak
+   inside `game/dota/`. Language overlays (`game/dota_<locale>/`) are left
+   alone.
+2. Source 2 mounts language overlays **after** the base game, so an asset
+   inside `dota_<locale>/pak66_dir.vpk` is guaranteed to win over the same
+   path in `dota/pak01_*.vpk`. The previously documented
+   `game/dota/pak66_dir.vpk` approach can be ignored / not loaded by Source 2
+   on some installations — the language-overlay path is reliable.
 
 The VPK we build can contain any combination of:
 
@@ -25,7 +37,8 @@ The VPK we build can contain any combination of:
   [dota2-minify](https://github.com/Egezenn/dota2-minify) mod catalog
   (see [Mods included](#mods-included) below).
 
-Reverting is one command (or one file deletion).
+Reverting is one command (deletes the `dota_<locale>/` folder and drops
+`-language <locale>` from launch options).
 
 ## Mods included
 
@@ -56,16 +69,20 @@ attribution to original mod authors.
 ```
 dota10x-lowspec/
 ├── 1_settings/                  # autoexec.cfg, launch options, in-game settings
-├── 2_particle_killer/           # Loose-file override path (legacy fallback)
+├── 2_particle_killer/           # Loose-file override path (legacy / unreliable)
 ├── 3_workshop_tools_path/       # Workshop Tools downscale/strip pipeline
 ├── 4_overrides_helpers/         # install/uninstall for the loose-file path
-├── 5_pak66_builder/             # ★ VPK-based particle override (recommended)
-├── 6_minify_mods/               # ★ Apply vendored minify mods into pak66.vpk
+├── 5_pak66_builder/             # ★ Particle nuke + Steam launch-option helper
+│   ├── kill_particles_pak66.{py,bat}    # builds dota_<locale>/pak66_dir.vpk
+│   ├── set_launch_option.{py,bat}       # adds/removes -language <locale>
+│   └── uninstall_pak66.bat              # removes folder + launch option
+├── 6_minify_mods/               # ★ Apply vendored minify mods into pak66
+│   └── apply_mods.{py,bat}              # builds dota_<locale>/pak66_dir.vpk
 ├── data/                        # VPK listings + heaviest-files reports
 ├── vendor/dota2-minify/         # Upstream mods + blank stubs (GPL-3.0)
 ├── LICENSE                      # GPL-3.0 (required because we vendor minify)
 ├── README.md                    # this file
-├── README.ru.md                 # Russian readme
+├── README_RU.md                 # Russian readme
 └── THIRD_PARTY_NOTICES.md       # Attribution
 ```
 
@@ -75,34 +92,41 @@ dota10x-lowspec/
 
 - Windows 10/11 with a normal Dota 2 install
 - Python 3.7+ (3.10+ recommended). Add to PATH.
-- 100 MB free disk for `pak66_dir.vpk`
+- Python packages: `pip install vpk vdf` (the `.bat` wrappers install them on
+  first run if missing)
+- ~100 MB free disk for `pak66_dir.vpk`
 
-### One-shot: kill every particle in the game
+### One-shot: kill every particle + apply all mods (recommended)
+
+Close Steam first (required so Steam doesn't overwrite your launch options),
+then run from a normal CMD/PowerShell:
 
 ```bat
+REM Step 1 – build dota_minify\pak66_dir.vpk with all mods + total particle nuke
+6_minify_mods\apply_mods.bat all --merge
 5_pak66_builder\kill_particles_pak66.bat total
+
+REM Step 2 – add "-language minify" to Dota 2 Steam launch options
+5_pak66_builder\set_launch_option.bat
 ```
 
-This produces `<dota>/game/dota/pak66_dir.vpk` (~70 MB) containing 80,731
-`null.vpcf_c` stubs. Restart Dota — no spell visuals, no fountain fire, no
-trails. Gameplay unchanged.
+Now relaunch Steam, start Dota — no spell visuals, no fountain fire, no
+trails, dark terrain, no river, no weather, no menu hero renders. Gameplay
+(cooldowns, damage, hitboxes, projectile travel time) is **unchanged**.
 
-Other presets: `safe`, `aggressive`, `nuclear` (less aggressive cuts).
+Kill-particles presets: `safe` (~19,700), `aggressive` (~30,400),
+`nuclear` (~39,400), `total` (~80,700 – all).
 
-### Apply minify mods
+The locale name is configurable via `--locale <name>` on every script
+(default: `minify`). Use a different locale only if you want to keep an
+existing `dota_minify/` folder around or you already use minify itself.
 
-```bat
-6_minify_mods\apply_mods.bat all
-```
-
-Or a curated set:
+### Apply only specific minify mods
 
 ```bat
 6_minify_mods\apply_mods.bat "Misc Optimization,Dark Terrain,Remove Foilage,Remove River"
+5_pak66_builder\set_launch_option.bat
 ```
-
-This appends mod assets to the pak66 build (or builds a fresh one if none
-exists). Final `pak66_dir.vpk` contains particles+mods together.
 
 ### Uninstall
 
@@ -110,7 +134,9 @@ exists). Final `pak66_dir.vpk` contains particles+mods together.
 5_pak66_builder\uninstall_pak66.bat
 ```
 
-Or just delete `<dota>/game/dota/pak66_dir.vpk`. One file. Vanilla restored.
+This deletes `<dota>/game/dota_minify/` and (after a confirmation) removes
+`-language minify` from your Steam launch options. Vanilla restored — no
+touches to `game/dota/`, no risk of triggering Steam's "Verify integrity".
 
 ## Multi-instance / 10-box
 

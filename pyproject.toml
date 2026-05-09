@@ -20,6 +20,9 @@ classifiers = [
 dependencies = [
     "vpk>=1.4.0",
     "pillow>=9.0.0",
+    # vdf is needed by 5_pak66_builder/set_launch_option.py to parse and
+    # rewrite Steam's localconfig.vdf (adds/removes "-language <locale>").
+    "vdf>=3.4",
 ]
 
 [project.urls]

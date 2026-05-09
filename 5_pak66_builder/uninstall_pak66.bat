@@ -2,9 +2,17 @@
 setlocal
 REM ============================================================
 REM  uninstall_pak66.bat
-REM  Removes the pak66_dir.vpk override file from the Dota 2
-REM  install. Optionally also removes a .bak backup if present.
+REM  Removes the dota_<locale>\ language overlay folder created
+REM  by kill_particles_pak66.py / apply_mods.py and (optionally)
+REM  drops the "-language <locale>" Steam launch option.
+REM
+REM  Default locale is "minify". Pass another as the first arg:
+REM      uninstall_pak66.bat
+REM      uninstall_pak66.bat russian
 REM ============================================================
+
+set LOCALE=%1
+if "%LOCALE%"=="" set LOCALE=minify
 
 where python >nul 2>&1
 if errorlevel 1 (
@@ -12,44 +20,36 @@ if errorlevel 1 (
   exit /b 1
 )
 
-REM Use Python to find the install path - same logic as kill_particles_pak66.py
-for /f "delims=" %%i in ('python -c "import sys, pathlib; sys.path.insert(0, r'%~dp0..\2_particle_killer'); from vpk_reader import find_dota_install; p = find_dota_install(); print(p if p else '')"') do set DOTA=%%i
+echo === dota10x_lowspec :: uninstall_pak66 ===
+echo Locale: %LOCALE%
+echo.
 
-if "%DOTA%"=="" (
-  echo [ERROR] Could not auto-detect Dota 2. Edit this script or remove pak66_dir.vpk manually.
+REM Step 1: remove the dota_<locale>\ folder via kill_particles_pak66.py --uninstall
+python "%~dp0kill_particles_pak66.py" --locale %LOCALE% --uninstall
+if errorlevel 1 (
+  echo [!] kill_particles_pak66.py --uninstall failed.
+  pause
   exit /b 1
 )
 
-set TARGET=%DOTA%\game\dota\pak66_dir.vpk
-set BACKUP=%DOTA%\game\dota\pak66_dir.vpk.bak
-
-echo === dota10x_lowspec :: uninstall_pak66 ===
-echo Dota 2 install: %DOTA%
 echo.
+echo IMPORTANT: For Dota to stop loading the override, you must
+echo also remove "-language %LOCALE%" from Steam launch options.
+echo.
+choice /C YN /M "Drop '-language %LOCALE%' from Steam launch options now?"
+if errorlevel 2 goto :done
 
-if not exist "%TARGET%" (
-  echo [INFO] %TARGET% does not exist - nothing to remove.
-) else (
-  echo Found: %TARGET%
-  choice /C YN /M "Delete pak66_dir.vpk?"
-  if errorlevel 2 (
-    echo Aborted.
-    exit /b 0
-  )
-  del /f /q "%TARGET%"
-  echo Deleted: pak66_dir.vpk
-)
-
-if exist "%BACKUP%" (
-  echo.
-  echo Found backup: %BACKUP%
-  choice /C YN /M "Also delete pak66_dir.vpk.bak?"
-  if errorlevel 2 goto :done
-  del /f /q "%BACKUP%"
-  echo Deleted: pak66_dir.vpk.bak
+echo.
+echo (Steam must be CLOSED for this to stick.)
+pause
+python "%~dp0set_launch_option.py" --locale %LOCALE% --remove
+if errorlevel 1 (
+  echo [!] set_launch_option.py --remove failed.
+  pause
+  exit /b 1
 )
 
 :done
 echo.
-echo Done. Restart Dota 2 - all particles back to vanilla.
+echo Done. Restart Steam + Dota 2 - all particles back to vanilla.
 pause

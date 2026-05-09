@@ -10,11 +10,21 @@
 
 ## Что делает тулкит
 
-Собирает рядом с `pak01_dir.vpk` ещё один VPK — `pak66_dir.vpk`. Source 2
-монтирует все `pak*_dir.vpk` по возрастанию номера, поэтому `pak66`
-переопределяет `pak01` для тех же путей. Это тот же механизм, что использует
-популярный [dota2-minify](https://github.com/Egezenn/dota2-minify), и моды
-которого этот проект частично заимствует (с лицензией GPL-3.0).
+Собирает `pak66_dir.vpk` **внутри отдельной папки-оверлея языка**
+(`<dota>\game\dota_minify\` по умолчанию) и переключает Steam launch
+options на `-language minify`, чтобы Dota 2 эту папку подхватила.
+
+Это **тот же** механизм, что использует [dota2-minify](https://github.com/Egezenn/dota2-minify),
+и моды которого этот проект заимствует (под GPL-3.0). Почему не класть VPK
+прямо в `game/dota/`? Две причины:
+
+1. **Steam «Verify integrity of game files»** удаляет любой не-ванильный
+   pak в `game/dota/`. Папки-оверлеи языка (`game/dota_<locale>/`) Steam
+   не трогает.
+2. Source 2 монтирует оверлеи языка **после** базы, т.е. ассет внутри
+   `dota_<locale>/pak66_dir.vpk` гарантированно перебивает тот же путь в
+   `dota/pak01_*.vpk`. Старый подход «`game/dota/pak66_dir.vpk`» на части
+   установок просто **не загружается** — путь через `-language` надёжен.
 
 В собираемый pak66 можно положить:
 
@@ -26,7 +36,8 @@
   [dota2-minify](https://github.com/Egezenn/dota2-minify)
   (см. [Моды](#моды) ниже).
 
-Откат — одна команда (или удалить один файл).
+Откат — одна команда (удаляет папку `dota_<locale>/` и снимает
+`-language <locale>` из launch options).
 
 ## Моды
 
@@ -56,11 +67,15 @@
 ```
 dota10x-lowspec/
 ├── 1_settings/                  # autoexec.cfg, launch options, in-game settings
-├── 2_particle_killer/           # Loose-file путь (легаси, может не работать)
+├── 2_particle_killer/           # Loose-file путь (легаси, ненадёжно)
 ├── 3_workshop_tools_path/       # Workshop Tools downscale/strip пайплайн
 ├── 4_overrides_helpers/         # install/uninstall для loose-file пути
-├── 5_pak66_builder/             # ★ VPK-based партикл-килл (рекомендуется)
+├── 5_pak66_builder/             # ★ Партикл-килл + правка Steam launch options
+│   ├── kill_particles_pak66.{py,bat}    # билдит dota_<locale>/pak66_dir.vpk
+│   ├── set_launch_option.{py,bat}       # включает/убирает -language <locale>
+│   └── uninstall_pak66.bat              # удаляет папку + launch option
 ├── 6_minify_mods/               # ★ Применение модов minify в pak66.vpk
+│   └── apply_mods.{py,bat}              # билдит dota_<locale>/pak66_dir.vpk
 ├── data/                        # VPK listings + heaviest-files отчёты
 ├── vendor/dota2-minify/         # Upstream моды + blank stubs (GPL-3.0)
 ├── LICENSE                      # GPL-3.0 (обязательно — мы вендорим minify)
@@ -75,41 +90,41 @@ dota10x-lowspec/
 
 - Windows 10/11 с обычной установкой Dota 2
 - Python 3.7+ (рекомендую 3.10+). При установке поставь галку "Add to PATH".
+- Python-пакеты: `pip install vpk vdf` (`.bat`-обёртки сами их доставят при
+  первом запуске)
 - ~100 МБ свободного места под `pak66_dir.vpk`
 
-### Один шаг: убить все партиклы в игре
+### Один проход: партикл-килл + все моды (рекомендуется)
+
+**Закрой Steam перед запуском** (иначе Steam перезапишет launch options).
+Потом из обычного CMD/PowerShell:
 
 ```bat
+REM Шаг 1 — собрать dota_minify\pak66_dir.vpk: моды + полный партикл-килл
+6_minify_mods\apply_mods.bat all --merge
 5_pak66_builder\kill_particles_pak66.bat total
+
+REM Шаг 2 — добавить "-language minify" в Steam launch options Dota 2
+5_pak66_builder\set_launch_option.bat
 ```
 
-Создаст `<dota>\game\dota\pak66_dir.vpk` (~70 МБ) с 80,731 стабом
-`null.vpcf_c`. Перезапусти Dota — нет визуала спеллов, нет огня в фонтане,
-нет трейлов снарядов. Геймплей не меняется.
+Запускай Steam, заходи в Dota — никаких визуалов спеллов, фонтанного огня,
+трейлов; тёмная карта, нет реки, нет погоды, нет рендеров героев в меню.
+Геймплей (кулдауны, урон, хитбоксы, время полёта снарядов) — **без изменений**.
 
-Другие пресеты: `safe`, `aggressive`, `nuclear` (менее агрессивные).
+Пресеты `kill_particles`: `safe` (~19,700), `aggressive` (~30,400),
+`nuclear` (~39,400), `total` (~80,700 — все).
 
-### Применить моды minify
+Название локали меняется флагом `--locale <name>` у любого скрипта
+(по умолчанию: `minify`). Свою локаль имеет смысл задать, только если
+ты уже используешь сам minify или хочешь несколько профилей.
 
-```bat
-6_minify_mods\apply_mods.bat all
-```
-
-Или конкретный набор:
+### Применить только конкретные моды
 
 ```bat
 6_minify_mods\apply_mods.bat "Misc Optimization,Dark Terrain,Remove Foilage,Remove River"
+5_pak66_builder\set_launch_option.bat
 ```
-
-Скрипт собирает pak66 со всеми указанными модами. Если хочешь объединить
-партикл-килл + моды в одном pak66:
-
-```bat
-5_pak66_builder\kill_particles_pak66.bat total
-6_minify_mods\apply_mods.bat all --merge
-```
-
-`--merge` распакует существующий pak66 в стейджинг и добавит моды поверх.
 
 ### Откат
 
@@ -117,7 +132,9 @@ dota10x-lowspec/
 5_pak66_builder\uninstall_pak66.bat
 ```
 
-Или просто удали `<dota>\game\dota\pak66_dir.vpk`. Всё, ванилла вернулась.
+Удаляет `<dota>\game\dota_minify\` и (по подтверждению) убирает
+`-language minify` из Steam launch options. Ванилла. `game/dota/` мы
+не трогали — "Verify integrity" в Steam не сорвётся.
 
 ## 10 окон / Multi-box
 
