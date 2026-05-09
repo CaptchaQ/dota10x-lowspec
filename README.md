@@ -57,7 +57,9 @@ attribution to original mod authors.
 | Misc Optimization | broad cvar pack + hundreds of ambient particle blanks | [robbyz512](https://github.com/robbyz512) |
 | Dark Terrain | dark/black terrain, reduces visual noise (~300 files, full texture pack) | [robbyz512](https://github.com/robbyz512) |
 | **Simple Dark Terrain** | lite version: only the 17 `.vmat_c` material overrides from Dark Terrain, no texture pack — much smaller VPK, faster build | derivative of [robbyz512](https://github.com/robbyz512)'s Dark Terrain |
-| Remove Foilage | removes grass and trees | [robbyz512](https://github.com/robbyz512) |
+| Remove Foilage | stubs grass / bush / flower **materials** so those props render as flat / blank surfaces (does NOT remove the geometry) | [robbyz512](https://github.com/robbyz512) |
+| **Remove Tree Models** | stubs **312 `.vmdl_c` files** of trees / bushes / foliage in `pak01_dir.vpk` with the 3 KB blank model — props physically disappear instead of just losing textures. Gameplay (collision, vision, Tango) unaffected | derivative of [robbyz512](https://github.com/robbyz512) / [Egezenn](https://github.com/Egezenn) — blacklist generated from `pak01_dir.vpk` |
+| Tree Mod | replaces 17 main vanilla tree props with low-poly "topiary" cube versions (trees stay visible but cheap to render) | [Egezenn](https://github.com/Egezenn) |
 | Remove River | removes the river / replaces water with flat plane | [robbyz512](https://github.com/robbyz512) |
 | Remove Weather Effects | removes rain/snow/fog | [robbyz512](https://github.com/robbyz512) |
 | Remove Hero Renders | removes hero renders in main menu (panorama) | [Egezenn](https://github.com/Egezenn) |

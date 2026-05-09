@@ -52,7 +52,9 @@ options на `-language minify`, чтобы Dota 2 эту папку подхв�
 | Misc Optimization | широкий cvar-pack + сотни ambient-партикл-стабов | [robbyz512](https://github.com/robbyz512) |
 | Dark Terrain | тёмный/чёрный террейн, меньше визуального шума (~300 файлов, полный набор текстур) | [robbyz512](https://github.com/robbyz512) |
 | **Simple Dark Terrain** | облегчённый вариант: только 17 `.vmat_c` материал-определений из Dark Terrain, без текстур — pak66 сильно меньше, билдится быстрее | derivative от [robbyz512](https://github.com/robbyz512) (Dark Terrain) |
-| Remove Foilage | убирает траву и деревья | [robbyz512](https://github.com/robbyz512) |
+| Remove Foilage | стабит **материалы** травы / кустов / цветов — пропсы рендерятся как плоские/пустые поверхности (геометрия НЕ удаляется) | [robbyz512](https://github.com/robbyz512) |
+| **Remove Tree Models** | стабит **312 `.vmdl_c`-файлов** деревьев / кустов / листвы в `pak01_dir.vpk` пустой 3-килобайтной моделью — пропсы **физически исчезают**, а не остаются как розовые ошибки. Геймплей (коллизия, обзор, Tango) не страдает | derivative от [robbyz512](https://github.com/robbyz512) / [Egezenn](https://github.com/Egezenn) — blacklist собран из `pak01_dir.vpk` |
+| Tree Mod | заменяет 17 главных ванильных tree-props на низкополигональные «topiary»-кубы (деревья видны, но дёшевы для рендера) | [Egezenn](https://github.com/Egezenn) |
 | Remove River | убирает реку (плоская плоскость вместо воды) | [robbyz512](https://github.com/robbyz512) |
 | Remove Weather Effects | убирает дождь/снег/туман | [robbyz512](https://github.com/robbyz512) |
 | Remove Hero Renders | убирает рендеры героев в главном меню (panorama) | [Egezenn](https://github.com/Egezenn) |
