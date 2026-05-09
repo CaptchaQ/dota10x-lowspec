@@ -71,6 +71,7 @@ BLANK_FILES_DIR = REPO_ROOT / "vendor" / "dota2-minify" / "blank-files"
 # Each category = (pak01 path prefix, expected file extension).
 # Blocked categories are listed but raise an error if requested.
 CATEGORIES: dict[str, tuple[str, str]] = {
+    # ---- TIER 1: all-safe (zero gameplay/UI impact) ----
     "vo":                  ("sounds/vo/",                 "vsnd_c"),
     "music":               ("sounds/music/",              "vsnd_c"),
     "weapon-sounds":       ("sounds/weapons/",            "vsnd_c"),
@@ -79,13 +80,63 @@ CATEGORIES: dict[str, tuple[str, str]] = {
     "cosmetics-models":    ("models/items/",              "vmdl_c"),
     "cosmetics-mats":      ("materials/models/items/",    "vmat_c"),
     "cosmetics-particles": ("particles/econ/items/",      "vpcf_c"),
+
+    # ---- TIER 2: aggressive (cosmetic / event content + UI textures) ----
+    # Big disk-savings, mostly invisible / pure cosmetic, but the menu
+    # will lose hero portraits / icons / loading-screen art.
+    "panorama-images":     ("panorama/images/",           "vtex_c"),  # ~17.8 GB - menu icons, hero portraits, ability/item icons
+    "stickers":            ("materials/stickers/",        "vtex_c"),  # ~11 GB - cosmetic stickers
+    "particle-textures":   ("materials/particle/",        "vtex_c"),  # ~917 MB - dead weight after particle nuke
+    "cosmetics-textures":  ("models/items/",              "vtex_c"),  # ~992 MB - cosmetic .vtex_c (paired with cosmetics-models)
+    "event-textures":      ("models/events/",             "vtex_c"),  # ~366 MB - Diretide/Frostivus/etc cosmetics
+    "event-models":        ("models/events/",             "vmdl_c"),  # ~102 MB
+    "loading-backgrounds": ("maps/backgrounds/",          "vtex_c"),  # ~196 MB - loading-screen backdrops
+    "skybox":              ("materials/skybox/",          "vtex_c"),  # ~136 MB - skybox
+    "tournament-content":  ("sounds/teamfancontent/",     "vsnd_c"),  # ~123 MB - TI fan chants/cheers
+    "misc-sounds":         ("sounds/misc/",               "vsnd_c"),  # ~102 MB - misc sound effects
+    "props-structures":    ("models/props_structures/",   "vmdl_c"),  # ~103 MB - generic structure decor
+
+    # ---- TIER 3: extreme (heroes/creeps/units render as flat error textures) ----
+    # Game still playable - hitboxes, animations, hp bars, mechanics all
+    # work - but every model surface is a 1x1 placeholder. Heroes look
+    # like solid colors / checkerboards. Suitable for autopilot 10-box
+    # bot farms where you don't need to LOOK at the game.
+    "hero-textures":       ("models/heroes/",             "vtex_c"),  # ~3 GB
+    "model-textures":      ("materials/models/",          "vtex_c"),  # ~14 GB - all model surfaces
+    "creep-textures":      ("models/creeps/",             "vtex_c"),  # ~121 MB
+    "unit-models":         ("models/creeps/",             "vmdl_c"),  # ~92 MB
 }
 
-ALL_SAFE = list(CATEGORIES.keys())
+ALL_SAFE = [
+    "vo", "music", "weapon-sounds", "item-sounds", "ambient-sounds",
+    "cosmetics-models", "cosmetics-mats", "cosmetics-particles",
+]
+
+ALL_AGGRESSIVE = ALL_SAFE + [
+    "panorama-images", "stickers", "particle-textures", "cosmetics-textures",
+    "event-textures", "event-models", "loading-backgrounds", "skybox",
+    "tournament-content", "misc-sounds", "props-structures",
+]
+
+ALL_EXTREME = ALL_AGGRESSIVE + [
+    "hero-textures", "model-textures", "creep-textures", "unit-models",
+]
+
+BUNDLES = {
+    "all-safe":       ALL_SAFE,
+    "all-aggressive": ALL_AGGRESSIVE,
+    "all-extreme":    ALL_EXTREME,
+}
 
 # These are intentionally NOT user-selectable. They will brick the game.
 BLOCKED_CATEGORIES = {
-    "heroes-models", "heroes-mats", "ui-sounds", "panorama",
+    "heroes-models",        # base hero meshes - game crashes / heroes invisible
+    "heroes-mats",          # base hero materials - heroes pink/error
+    "ui-sounds",            # menu / click sounds + critical event cues
+    "panorama",             # all UI definitions
+    "localization",         # translation strings - text breaks
+    "scripts",              # game-logic scripts (npc_units, items, abilities)
+    "vsndevts",             # sound event definitions - audio system breaks
 }
 
 
@@ -105,7 +156,8 @@ def main() -> int:
     ap.add_argument("--dota", type=Path, default=None,
                     help="Path to '...steamapps/common/dota 2 beta' (auto-detected if omitted)")
     ap.add_argument("--categories", default="all-safe",
-                    help="Comma-separated category names, or 'all-safe' / 'list'. "
+                    help="Comma-separated category names, or one of the bundles "
+                         "'all-safe' / 'all-aggressive' / 'all-extreme'. "
                          "See module docstring for the full set.")
     ap.add_argument("--list", action="store_true",
                     help="List supported categories and exit.")
@@ -128,7 +180,10 @@ def main() -> int:
         print("Supported categories:")
         for name, (prefix, ext) in CATEGORIES.items():
             print(f"  {name:22s}  ->  {prefix}**/*.{ext}")
-        print("  all-safe                 ->  all of the above (recommended)")
+        print()
+        print("Bundles (use one at a time, do NOT combine with other names):")
+        for name, members in BUNDLES.items():
+            print(f"  {name:22s}  ->  {len(members)} categories")
         return 0
 
     if args.pak_number <= 1 or args.pak_number > 99:
@@ -161,11 +216,12 @@ def main() -> int:
     if not raw:
         print("ERROR: --categories is empty.")
         return 1
-    if "all-safe" in raw:
+    bundle_in_raw = next((c for c in raw if c in BUNDLES), None)
+    if bundle_in_raw is not None:
         if len(raw) != 1:
-            print("ERROR: 'all-safe' cannot be combined with other categories.")
+            print(f"ERROR: bundle {bundle_in_raw!r} cannot be combined with other names.")
             return 1
-        selected = list(ALL_SAFE)
+        selected = list(BUNDLES[bundle_in_raw])
     else:
         selected = []
         for c in raw:

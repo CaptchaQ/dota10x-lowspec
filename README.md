@@ -179,56 +179,101 @@ existing `dota_minify/` folder around or you already use minify itself.
 
 ### Cut map load time
 
-Particles are not the heaviest thing Dota 2 loads. On a stock install
-`pak01_dir.vpk` contains:
+Particles are not the heaviest thing Dota 2 loads. The biggest disk reads at
+load come from voice lines, music, cosmetic models/textures, and panorama
+images. `strip_assets_pak66` replaces them with minimal blank stubs from
+`vendor/dota2-minify/blank-files/` (1.5 KB per `.vsnd_c`, 3 KB per `.vmdl_c`,
+1×1 px per `.vtex_c`).
 
-| Category | Files | Original size | Brick risk |
-|----------|-------|---------------|------------|
-| `sounds/vo/**/*.vsnd_c` (hero voice lines) | 91,020 | **3,773 MB** | safe |
-| `models/items/**/*.vmdl_c` (cosmetics) | 12,245 | **1,483 MB** | safe |
-| `sounds/music/**/*.vsnd_c` | 876 | **1,130 MB** | safe |
-| `sounds/weapons/**/*.vsnd_c` (attack sfx) | 2,639 | **792 MB** | safe |
-| `materials/models/items/**/*.vmat_c` | 13,317 | **131 MB** | safe |
-| `particles/econ/items/**/*.vpcf_c` | 39,945 | **102 MB** | safe |
-| `sounds/items/**/*.vsnd_c` | 184 | 81 MB | safe |
-| `sounds/ambient/**/*.vsnd_c` | 242 | 158 MB | safe |
-| **TOTAL `all-safe`** | **160,468** | **~7.6 GB** | safe |
-| `models/heroes/**` (base heroes) | 1,705 | 513 MB | **DO NOT** — game crashes |
-| `sounds/ui/**` | 556 | 153 MB | **DO NOT** — menu breaks |
+There are **three tiers**, picking how aggressive you want to go. Each tier
+includes everything from the previous one. Numbers are measured against a
+real `pak01_dir.vpk` (371,479 entries):
 
-Replace every `all-safe` file with the minimal blank stub from
-`vendor/dota2-minify/blank-files/` (1.5 KB per `.vsnd_c`, 3 KB per `.vmdl_c`):
+| Bundle | Categories | Files stubbed | Original size | Visual cost |
+|---|---:|---:|---:|---|
+| **`all-safe`**       | 8  | 160,468 | ~7.6 GB | **none** — gameplay & UI identical |
+| **`all-aggressive`** | 19 | 221,931 | ~37.6 GB | menu loses hero portraits / icons / loading-screen art; heroes still look normal in-game |
+| **`all-extreme`**    | 23 | 284,738 | ~55.6 GB | heroes / creeps / props render as flat error textures, but hitboxes / animations / HP bars / mechanics all work |
+
+Pick one bundle (do **not** combine bundle names). Close Steam first, then:
 
 ```bat
-REM Step 1 — stub all 160k+ heavy assets (saves ~7.6 GB of disk reads at load)
+REM Tier 1 — zero visual impact (recommended baseline)
 5_pak66_builder\strip_assets_pak66.bat all-safe
+5_pak66_builder\set_launch_option.bat
 
-REM Step 2 — add "-language minify" to Steam launch options
+REM Tier 2 — main menu loses portraits / icons
+5_pak66_builder\strip_assets_pak66.bat all-aggressive
+5_pak66_builder\set_launch_option.bat
+
+REM Tier 3 — heroes are flat colors. Useful for headless 10-box bot farms.
+5_pak66_builder\strip_assets_pak66.bat all-extreme
 5_pak66_builder\set_launch_option.bat
 ```
 
-Finer-grained category control (no spaces between names):
+#### Tier 1 — `all-safe` (8 categories, ~7.6 GB)
+
+Voice lines, music, attack sounds, ambient sfx, item sounds, and pure cosmetic
+models / materials / particles. Everything here is invisible to gameplay:
+heroes still look normal, the UI is untouched, hitboxes / damage / cooldowns
+unchanged. Recommended for everyone, including 1-instance "I just want faster
+loads" users.
+
+#### Tier 2 — `all-aggressive` (+11 categories, ~+30 GB)
+
+On top of `all-safe`, also stubs panorama images (~17.8 GB), stickers
+(~11 GB), particle textures, cosmetic textures, event content, loading-screen
+backgrounds, skybox, tournament fan content, and structural prop models.
+
+**Tradeoff:** the main menu / dashboard loses most of its hero portraits,
+item icons, loading-screen art, and item-shop preview images. **In actual
+gameplay** heroes still look normal — only menu / inventory / shop visuals
+degrade.
+
+#### Tier 3 — `all-extreme` (+4 categories, ~+18 GB)
+
+On top of `all-aggressive`, also stubs hero textures (~3 GB), every
+`materials/models/` texture (~14 GB), creep textures, and unit models.
+
+**Tradeoff:** heroes / illusions / creeps / units render as **flat error
+colors / checkerboards** during gameplay. The game is still 100 % playable —
+hitboxes, animations, HP bars, spell mechanics all work — but you literally
+cannot tell heroes apart by looking. Suitable for autopilot 10-box / bot
+farms / scripted account warming where you don't actually look at the screen.
+
+#### Finer-grained category control
 
 ```bat
-5_pak66_builder\strip_assets_pak66.bat vo,music
 5_pak66_builder\strip_assets_pak66.bat --list
+5_pak66_builder\strip_assets_pak66.bat vo,music
+5_pak66_builder\strip_assets_pak66.bat panorama-images,stickers
 ```
 
-It stacks with the particle nuke and the visual mods — `kill_particles_pak66`
-writes a fresh `pak66_dir.vpk`, so it goes first; `strip_assets_pak66 --merge`
-and `apply_mods --merge` then layer onto the same VPK:
+Categories that are **intentionally blocked** because they brick the game:
+`heroes-models` (hero meshes), `heroes-mats` (hero materials), `ui-sounds`
+(menu / event audio), `panorama` (UI definitions), `localization`,
+`scripts` (npc / item / ability logic), `vsndevts` (sound event
+definitions). The script will refuse with an error if you ask for any of
+these.
+
+#### Stacking with particle nuke + visual mods
+
+`strip_assets_pak66` stacks with `kill_particles_pak66` and `apply_mods`
+via `--merge`. `kill_particles_pak66` writes a fresh `pak66_dir.vpk`, so it
+goes first; everything afterwards uses `--merge` to layer onto the same VPK:
 
 ```bat
 5_pak66_builder\kill_particles_pak66.bat total
-5_pak66_builder\strip_assets_pak66.bat all-safe --merge
+5_pak66_builder\strip_assets_pak66.bat all-extreme --merge
 6_minify_mods\apply_mods.bat all --merge
 5_pak66_builder\set_launch_option.bat
 ```
 
 Result: every particle stubbed, every voice line / music / cosmetic / attack
-sound stubbed, every visual mod applied. **Tradeoff:** heroes will be silent
-(no voice lines, no attack sounds) and cosmetic models render as nothing —
-base hero models / animations / UI / spell mechanics all still work.
+sound / panorama image / hero texture stubbed, every visual mod applied
+(dark terrain, no river, no foliage, no weather, etc.). About **the most
+aggressive client-side cut** you can do without modifying `game/dota/`
+itself.
 
 ### Uninstall
 
