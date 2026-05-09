@@ -55,20 +55,24 @@ attribution to original mod authors.
 | **Minify Spells & Items** | replaces ~5,400 hand-curated spell/item particles with blank stubs (the canonical “disable particles” list from minify) | [Egezenn](https://github.com/Egezenn) |
 | **Minify Base Attacks** | replaces ~250 hand-curated base-attack particles with blank stubs | [Egezenn](https://github.com/Egezenn) |
 | Misc Optimization | broad cvar pack + hundreds of ambient particle blanks | [robbyz512](https://github.com/robbyz512) |
-| Dark Terrain | dark/black terrain, reduces visual noise | [robbyz512](https://github.com/robbyz512) |
+| Dark Terrain | dark/black terrain, reduces visual noise (~300 files, full texture pack) | [robbyz512](https://github.com/robbyz512) |
+| **Simple Dark Terrain** | lite version: only the 17 `.vmat_c` material overrides from Dark Terrain, no texture pack — much smaller VPK, faster build | derivative of [robbyz512](https://github.com/robbyz512)'s Dark Terrain |
 | Remove Foilage | removes grass and trees | [robbyz512](https://github.com/robbyz512) |
 | Remove River | removes the river / replaces water with flat plane | [robbyz512](https://github.com/robbyz512) |
 | Remove Weather Effects | removes rain/snow/fog | [robbyz512](https://github.com/robbyz512) |
 | Remove Hero Renders | removes hero renders in main menu (panorama) | [Egezenn](https://github.com/Egezenn) |
 | Remove Showcases | removes cosmetic showcases (panorama) | [Egezenn](https://github.com/Egezenn) |
+| **Remove Main Menu Background** | hides the dashboard background image / front-page contents (panorama) | [Egezenn](https://github.com/Egezenn) |
 | Remove Sprays | removes sprays | [robbyz512](https://github.com/robbyz512) |
 | Mute Ambient Sounds | mutes ambient world sounds (wind, water, etc.) | [robbyz512](https://github.com/robbyz512) |
 
-> **Note:** "Remove Hero Renders" and "Remove Showcases" rely on `styling.css` /
-> `xml_mod.json` modifications which require Workshop Tools to recompile.
-> They are vendored for completeness but **only the panorama-style hooks**
-> are applied by this CLI; for full effect on these two specific mods, use
-> the original [dota2-minify GUI](https://github.com/Egezenn/dota2-minify).
+> **Note:** "Remove Hero Renders", "Remove Showcases", and
+> "Remove Main Menu Background" rely on `styling.css` modifications
+> which require Workshop Tools to compile to `.vcss_c`. They are
+> vendored for completeness but the CLI **skips them with a warning**
+> (it can't compile CSS); for full effect on these three specific mods,
+> use the original [dota2-minify GUI](https://github.com/Egezenn/dota2-minify)
+> with Workshop Tools installed.
 
 ## Repository layout
 

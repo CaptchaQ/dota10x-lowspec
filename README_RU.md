@@ -50,19 +50,24 @@ options на `-language minify`, чтобы Dota 2 эту папку подхв�
 | **Minify Spells & Items** | заменяет ~5,400 вручную отобранных партиклов спеллов/предметов на пустые стабы (это и есть «канонический» список отключения партиклов из minify) | [Egezenn](https://github.com/Egezenn) |
 | **Minify Base Attacks** | заменяет ~250 вручную отобранных партиклов базовых атак на пустые стабы | [Egezenn](https://github.com/Egezenn) |
 | Misc Optimization | широкий cvar-pack + сотни ambient-партикл-стабов | [robbyz512](https://github.com/robbyz512) |
-| Dark Terrain | тёмный/чёрный террейн, меньше визуального шума | [robbyz512](https://github.com/robbyz512) |
+| Dark Terrain | тёмный/чёрный террейн, меньше визуального шума (~300 файлов, полный набор текстур) | [robbyz512](https://github.com/robbyz512) |
+| **Simple Dark Terrain** | облегчённый вариант: только 17 `.vmat_c` материал-определений из Dark Terrain, без текстур — pak66 сильно меньше, билдится быстрее | derivative от [robbyz512](https://github.com/robbyz512) (Dark Terrain) |
 | Remove Foilage | убирает траву и деревья | [robbyz512](https://github.com/robbyz512) |
 | Remove River | убирает реку (плоская плоскость вместо воды) | [robbyz512](https://github.com/robbyz512) |
 | Remove Weather Effects | убирает дождь/снег/туман | [robbyz512](https://github.com/robbyz512) |
 | Remove Hero Renders | убирает рендеры героев в главном меню (panorama) | [Egezenn](https://github.com/Egezenn) |
 | Remove Showcases | убирает витрины косметики (panorama) | [Egezenn](https://github.com/Egezenn) |
+| **Remove Main Menu Background** | прячет фон главного меню / front-page-контент (panorama) | [Egezenn](https://github.com/Egezenn) |
 | Remove Sprays | убирает спреи | [robbyz512](https://github.com/robbyz512) |
 | Mute Ambient Sounds | глушит ambient-звуки мира (ветер, вода и т.д.) | [robbyz512](https://github.com/robbyz512) |
 
-> **Важно:** "Remove Hero Renders" и "Remove Showcases" построены на
-> модификации `styling.css` / `xml_mod.json` и требуют Workshop Tools для
-> компиляции в `.vcss_c`. Они вендорятся для полноты, но **CLI их пропускает**;
-> для полного эффекта используй [GUI dota2-minify](https://github.com/Egezenn/dota2-minify).
+> **Важно:** "Remove Hero Renders", "Remove Showcases" и
+> "Remove Main Menu Background" построены на модификации `styling.css`
+> и требуют Workshop Tools для компиляции в `.vcss_c`. Они вендорятся
+> для полноты, но **CLI их пропускает с ворнингом** (CSS компилировать
+> нечем); для полного эффекта по этим трём конкретным модам используй
+> [GUI dota2-minify](https://github.com/Egezenn/dota2-minify) с
+> установленными Workshop Tools.
 
 ## Структура репо
 

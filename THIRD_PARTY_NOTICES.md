@@ -13,12 +13,20 @@ in this repository in compliance with that license.
   - All files under `vendor/dota2-minify/mods/` (mod definitions)
   - The `pak66`-side-loaded-VPK approach (architectural)
 - **Original authors of vendored mods**:
-  - **Egezenn** ([@Egezenn](https://github.com/Egezenn)) — `Remove Hero Renders`, `Remove Showcases`
+  - **Egezenn** ([@Egezenn](https://github.com/Egezenn)) — `Minify Spells & Items`, `Minify Base Attacks`, `Remove Hero Renders`, `Remove Showcases`, `Remove Main Menu Background`
   - **robbyz512** ([@robbyz512](https://github.com/robbyz512)) — `Misc Optimization`, `Dark Terrain`, `Remove Foilage`, `Remove River`, `Remove Weather Effects`, `Remove Sprays`, `Mute Ambient Sounds`
-- **Modifications by this project**: none to the vendored files themselves.
-  Files are copied verbatim from upstream and used as inputs to this project's
-  CLI builder. Any modifications would be tracked in commit history under
-  `vendor/dota2-minify/`.
+- **Modifications by this project**:
+  - The mods listed above (with the exception of `Simple Dark Terrain`)
+    are copied verbatim from upstream and used as inputs to this project's
+    CLI builder.
+  - `Simple Dark Terrain` is a derivative of `Dark Terrain` by robbyz512.
+    It contains only the 17 `.vmat_c` material-definition files from
+    upstream `Dark Terrain/files/materials/`; the ~280 `.vtex_c` texture
+    overrides are intentionally omitted. No file content is changed —
+    only the file selection differs. The mod remains GPL-3.0 as a
+    derivative work.
+  - All other modifications would be tracked in commit history under
+    `vendor/dota2-minify/`.
 
 The complete GPL-3.0 license text in [`LICENSE`](LICENSE) is the same text
 distributed with `dota2-minify` upstream and applies to this entire project
