@@ -112,19 +112,35 @@ dota10x-lowspec/
    substring-паттернами пресета. «Ядерный» вариант (пресет
    `total` стабит все ~80,700 `.vpcf_c`).
 
-### Один проход: все моды + полный партикл-килл (рекомендуется)
+### Отключить ВСЕ партиклы (ядерный вариант)
 
-**Закрой Steam перед запуском** (иначе Steam перезапишет launch options).
-Потом из обычного CMD/PowerShell:
+Нукает все ~80,700 `.vpcf_c` из `pak01_dir.vpk` (все спеллы, предметы, атаки,
+ambient, UI, варды, курьеры — вообще всё). **Закрой Steam**, потом:
 
 ```bat
-REM Шаг 1 — собрать dota_minify\pak66_dir.vpk: все моды
-РЕМ (включая Minify Spells & Items + Minify Base Attacks)
-6_minify_mods\apply_mods.bat all
-
-REM Шаг 2 — (опционально) добавить «ядерный» нук по паттерну на весь остальной ambient/UI визуал
-6_minify_mods\apply_mods.bat all --merge
+REM Шаг 1 — собрать dota_minify\pak66_dir.vpk с ВСЕМИ партиклами-стабами
 5_pak66_builder\kill_particles_pak66.bat total
+
+REM Шаг 2 — добавить "-language minify" в Steam launch options Dota 2
+5_pak66_builder\set_launch_option.bat
+```
+
+Пресеты `kill_particles`: `safe` (~19,700), `aggressive` (~30,400),
+`nuclear` (~39,400), `total` (~80,700 — все).
+
+### Один проход: ядерный партикл-нук + все визуал-моды (рекомендуется)
+
+Порядок важен: `kill_particles_pak66.bat` пишет `pak66_dir.vpk` с нуля —
+значит он идёт ПЕРВЫМ. `apply_mods.bat all --merge` потом распаковывает
+этот pak66, кладёт визуал-моды (тёмная карта, без реки, без травы …) сверху
+и собирает обратно.
+
+```bat
+REM Шаг 1 — свежий pak66 со всеми 80,700 партиклами-стабами
+5_pak66_builder\kill_particles_pak66.bat total
+
+REM Шаг 2 — расширяем его всеми визуал-модами (тёмная карта, без реки, без травы, …)
+6_minify_mods\apply_mods.bat all --merge
 
 REM Шаг 3 — добавить "-language minify" в Steam launch options Dota 2
 5_pak66_builder\set_launch_option.bat
@@ -134,10 +150,10 @@ REM Шаг 3 — добавить "-language minify" в Steam launch options Dot
 трейлов; тёмная карта, нет реки, нет погоды, нет рендеров героев в меню.
 Геймплей (кулдауны, урон, хитбоксы, время полёта снарядов) — **без изменений**.
 
-Пресеты `kill_particles`: `safe` (~19,700), `aggressive` (~30,400),
-`nuclear` (~39,400), `total` (~80,700 — все).
+### Отключение партиклов «как в minify» (курированный список)
 
-Если хочется **только** отключения партиклов «как в minify»:
+1-в-1 список из dota2-minify — ~5,600 вручную подобранных партикл-путей
+(спеллы, предметы, базовые атаки). Меньше и более точно чем пресет `total`:
 
 ```bat
 6_minify_mods\apply_mods.bat "Minify Spells & Items,Minify Base Attacks"

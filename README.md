@@ -113,20 +113,37 @@ This project ships **both** of minify's particle-disable approaches:
    stubs them out. This is the “nuclear” option (`total` preset stubs all
    ~80,700 `.vpcf_c` files).
 
-### One-shot: apply all mods + total particle nuke (recommended)
+### Disable EVERY particle (nuclear)
 
-Close Steam first (required so Steam doesn't overwrite your launch options),
-then run from a normal CMD/PowerShell:
+This nukes all ~80,700 `.vpcf_c` files in `pak01_dir.vpk` (every spell, item,
+attack, ambient, UI, ward, courier, etc.). Close Steam first, then:
 
 ```bat
-REM Step 1 – build dota_minify\pak66_dir.vpk with all mods (incl. Spells/Items + Base Attacks)
-6_minify_mods\apply_mods.bat all
-
-REM Step 2 – (optional) extend it with the total wildcard nuke for ambient/UI particles too
-6_minify_mods\apply_mods.bat all --merge
+REM Step 1 — build dota_minify\pak66_dir.vpk with EVERY particle stubbed
 5_pak66_builder\kill_particles_pak66.bat total
 
-REM Step 3 – add "-language minify" to Dota 2 Steam launch options
+REM Step 2 — add "-language minify" to Dota 2 Steam launch options
+5_pak66_builder\set_launch_option.bat
+```
+
+Kill-particles presets: `safe` (~19,700), `aggressive` (~30,400),
+`nuclear` (~39,400), `total` (~80,700 — all).
+
+### One-shot: total particle nuke + all visual mods (recommended)
+
+Order matters: `kill_particles_pak66.bat` writes a fresh `pak66_dir.vpk`,
+so it must run first. `apply_mods.bat all --merge` then unpacks that pak66,
+layers the visual mods (dark terrain, no river, no foliage, etc.) on top,
+and repacks.
+
+```bat
+REM Step 1 — fresh pak66 with all 80,700 particles stubbed
+5_pak66_builder\kill_particles_pak66.bat total
+
+REM Step 2 — extend it with all visual mods (dark terrain, no river, no foliage, ...)
+6_minify_mods\apply_mods.bat all --merge
+
+REM Step 3 — add "-language minify" to Dota 2 Steam launch options
 5_pak66_builder\set_launch_option.bat
 ```
 
@@ -134,10 +151,10 @@ Now relaunch Steam, start Dota — no spell visuals, no fountain fire, no
 trails, dark terrain, no river, no weather, no menu hero renders. Gameplay
 (cooldowns, damage, hitboxes, projectile travel time) is **unchanged**.
 
-Kill-particles presets: `safe` (~19,700), `aggressive` (~30,400),
-`nuclear` (~39,400), `total` (~80,700 – all).
+### Minify-style particle disabling only (curated list)
 
-If you only want minify-style particle disabling (skip the rest):
+Identical to what dota2-minify ships — ~5,600 hand-picked spell/item/base-attack
+particle paths. Smaller and more targeted than the wildcard `total` preset:
 
 ```bat
 6_minify_mods\apply_mods.bat "Minify Spells & Items,Minify Base Attacks"
