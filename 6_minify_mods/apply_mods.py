@@ -86,6 +86,7 @@ except ImportError:
 WORKSHOP_TOOLS_REQUIRED = {
     "Remove Hero Renders",
     "Remove Showcases",
+    "Remove Main Menu Background",
 }
 
 

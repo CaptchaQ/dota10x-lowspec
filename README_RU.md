@@ -50,19 +50,26 @@ options на `-language minify`, чтобы Dota 2 эту папку подхв�
 | **Minify Spells & Items** | заменяет ~5,400 вручную отобранных партиклов спеллов/предметов на пустые стабы (это и есть «канонический» список отключения партиклов из minify) | [Egezenn](https://github.com/Egezenn) |
 | **Minify Base Attacks** | заменяет ~250 вручную отобранных партиклов базовых атак на пустые стабы | [Egezenn](https://github.com/Egezenn) |
 | Misc Optimization | широкий cvar-pack + сотни ambient-партикл-стабов | [robbyz512](https://github.com/robbyz512) |
-| Dark Terrain | тёмный/чёрный террейн, меньше визуального шума | [robbyz512](https://github.com/robbyz512) |
-| Remove Foilage | убирает траву и деревья | [robbyz512](https://github.com/robbyz512) |
+| Dark Terrain | тёмный/чёрный террейн, меньше визуального шума (~300 файлов, полный набор текстур) | [robbyz512](https://github.com/robbyz512) |
+| **Simple Dark Terrain** | облегчённый вариант: только 17 `.vmat_c` материал-определений из Dark Terrain, без текстур — pak66 сильно меньше, билдится быстрее | derivative от [robbyz512](https://github.com/robbyz512) (Dark Terrain) |
+| Remove Foilage | стабит **материалы** травы / кустов / цветов — пропсы рендерятся как плоские/пустые поверхности (геометрия НЕ удаляется) | [robbyz512](https://github.com/robbyz512) |
+| **Remove Tree Models** | стабит **312 `.vmdl_c`-файлов** деревьев / кустов / листвы в `pak01_dir.vpk` пустой 3-килобайтной моделью — пропсы **физически исчезают**, а не остаются как розовые ошибки. Геймплей (коллизия, обзор, Tango) не страдает | derivative от [robbyz512](https://github.com/robbyz512) / [Egezenn](https://github.com/Egezenn) — blacklist собран из `pak01_dir.vpk` |
+| Tree Mod | заменяет 17 главных ванильных tree-props на низкополигональные «topiary»-кубы (деревья видны, но дёшевы для рендера) | [Egezenn](https://github.com/Egezenn) |
 | Remove River | убирает реку (плоская плоскость вместо воды) | [robbyz512](https://github.com/robbyz512) |
 | Remove Weather Effects | убирает дождь/снег/туман | [robbyz512](https://github.com/robbyz512) |
 | Remove Hero Renders | убирает рендеры героев в главном меню (panorama) | [Egezenn](https://github.com/Egezenn) |
 | Remove Showcases | убирает витрины косметики (panorama) | [Egezenn](https://github.com/Egezenn) |
+| **Remove Main Menu Background** | прячет фон главного меню / front-page-контент (panorama) | [Egezenn](https://github.com/Egezenn) |
 | Remove Sprays | убирает спреи | [robbyz512](https://github.com/robbyz512) |
 | Mute Ambient Sounds | глушит ambient-звуки мира (ветер, вода и т.д.) | [robbyz512](https://github.com/robbyz512) |
 
-> **Важно:** "Remove Hero Renders" и "Remove Showcases" построены на
-> модификации `styling.css` / `xml_mod.json` и требуют Workshop Tools для
-> компиляции в `.vcss_c`. Они вендорятся для полноты, но **CLI их пропускает**;
-> для полного эффекта используй [GUI dota2-minify](https://github.com/Egezenn/dota2-minify).
+> **Важно:** "Remove Hero Renders", "Remove Showcases" и
+> "Remove Main Menu Background" построены на модификации `styling.css`
+> и требуют Workshop Tools для компиляции в `.vcss_c`. Они вендорятся
+> для полноты, но **CLI их пропускает с ворнингом** (CSS компилировать
+> нечем); для полного эффекта по этим трём конкретным модам используй
+> [GUI dota2-minify](https://github.com/Egezenn/dota2-minify) с
+> установленными Workshop Tools.
 
 ## Структура репо
 
@@ -96,6 +103,33 @@ dota10x-lowspec/
   первом запуске)
 - ~100 МБ свободного места под `pak66_dir.vpk`
 
+### Самый простой путь: GUI (`dota10x_gui.bat`)
+
+Если не хочешь набирать CLI-команды руками — двойной клик по
+**`dota10x_gui.bat`** в корне репо. Скрипт сам найдёт Python, при первом
+запуске поставит `vpk` + `vdf`, потом откроет небольшое окно где можно:
+
+- Выбрать **пресет партиклов** (off / safe / aggressive / total).
+- Выбрать **bundle стрипа ассетов** (off / all-safe / all-aggressive /
+  all-extreme / all-nuclear / all-suicide).
+- Выбрать **визуал-моды** — либо галка «Apply all available mods», либо
+  отдельные. Моды, которым нужны Workshop Tools (компиляция CSS), показаны
+  серыми — чтобы случайно не выбрать то, что всё равно не сработает.
+- Включить/выключить **авто-добавление флага Steam** (`-language <locale>`).
+
+Дальше — кнопка **Build pak66**. GUI запускает четыре скрипта в правильном
+порядке (партиклы → ассеты → моды → launch-флаг) и сам докидывает `--merge`
+со 2-го шага, чтобы каждый шаг **дополнял** один и тот же `pak66_dir.vpk`,
+а не перезаписывал его. Лог стримится живьём в нижнее окошко. **Uninstall**
+сносит папку оверлея языка и убирает `-language <locale>` из launch options.
+
+> Steam должен быть **закрыт** перед нажатием Build / Uninstall — иначе
+> Steam перезапишет `localconfig.vdf` при выходе и правка флага потеряется.
+
+GUI — это **только фронтенд**, он зовёт те же скрипты из `5_pak66_builder/`
+и `6_minify_mods/` с теми же аргументами, что описаны ниже. Если удобнее
+скриптом — пользуйся CLI напрямую.
+
 ### Два способа отключить партиклы
 
 Проект поддерживает **оба** подхода minify:
@@ -112,19 +146,35 @@ dota10x-lowspec/
    substring-паттернами пресета. «Ядерный» вариант (пресет
    `total` стабит все ~80,700 `.vpcf_c`).
 
-### Один проход: все моды + полный партикл-килл (рекомендуется)
+### Отключить ВСЕ партиклы (ядерный вариант)
 
-**Закрой Steam перед запуском** (иначе Steam перезапишет launch options).
-Потом из обычного CMD/PowerShell:
+Нукает все ~80,700 `.vpcf_c` из `pak01_dir.vpk` (все спеллы, предметы, атаки,
+ambient, UI, варды, курьеры — вообще всё). **Закрой Steam**, потом:
 
 ```bat
-REM Шаг 1 — собрать dota_minify\pak66_dir.vpk: все моды
-РЕМ (включая Minify Spells & Items + Minify Base Attacks)
-6_minify_mods\apply_mods.bat all
-
-REM Шаг 2 — (опционально) добавить «ядерный» нук по паттерну на весь остальной ambient/UI визуал
-6_minify_mods\apply_mods.bat all --merge
+REM Шаг 1 — собрать dota_minify\pak66_dir.vpk с ВСЕМИ партиклами-стабами
 5_pak66_builder\kill_particles_pak66.bat total
+
+REM Шаг 2 — добавить "-language minify" в Steam launch options Dota 2
+5_pak66_builder\set_launch_option.bat
+```
+
+Пресеты `kill_particles`: `safe` (~19,700), `aggressive` (~30,400),
+`nuclear` (~39,400), `total` (~80,700 — все).
+
+### Один проход: ядерный партикл-нук + все визуал-моды (рекомендуется)
+
+Порядок важен: `kill_particles_pak66.bat` пишет `pak66_dir.vpk` с нуля —
+значит он идёт ПЕРВЫМ. `apply_mods.bat all --merge` потом распаковывает
+этот pak66, кладёт визуал-моды (тёмная карта, без реки, без травы …) сверху
+и собирает обратно.
+
+```bat
+REM Шаг 1 — свежий pak66 со всеми 80,700 партиклами-стабами
+5_pak66_builder\kill_particles_pak66.bat total
+
+REM Шаг 2 — расширяем его всеми визуал-модами (тёмная карта, без реки, без травы, …)
+6_minify_mods\apply_mods.bat all --merge
 
 REM Шаг 3 — добавить "-language minify" в Steam launch options Dota 2
 5_pak66_builder\set_launch_option.bat
@@ -134,10 +184,10 @@ REM Шаг 3 — добавить "-language minify" в Steam launch options Dot
 трейлов; тёмная карта, нет реки, нет погоды, нет рендеров героев в меню.
 Геймплей (кулдауны, урон, хитбоксы, время полёта снарядов) — **без изменений**.
 
-Пресеты `kill_particles`: `safe` (~19,700), `aggressive` (~30,400),
-`nuclear` (~39,400), `total` (~80,700 — все).
+### Отключение партиклов «как в minify» (курированный список)
 
-Если хочется **только** отключения партиклов «как в minify»:
+1-в-1 список из dota2-minify — ~5,600 вручную подобранных партикл-путей
+(спеллы, предметы, базовые атаки). Меньше и более точно чем пресет `total`:
 
 ```bat
 6_minify_mods\apply_mods.bat "Minify Spells & Items,Minify Base Attacks"
@@ -154,6 +204,151 @@ REM Шаг 3 — добавить "-language minify" в Steam launch options Dot
 6_minify_mods\apply_mods.bat "Misc Optimization,Dark Terrain,Remove Foilage,Remove River"
 5_pak66_builder\set_launch_option.bat
 ```
+
+### Сократить время загрузки карты
+
+Партиклы — не самое тяжёлое, что Dota грузит. Главные тяжи на загрузке —
+войсы героев, музыка, косметические модели/текстуры и panorama-картинки.
+`strip_assets_pak66` заменяет их на минимальные blank-стабы из
+`vendor/dota2-minify/blank-files/` (1.5 KB на `.vsnd_c`, 3 KB на `.vmdl_c`,
+1×1 px на `.vtex_c`).
+
+Есть **пять уровней агрессии**, выбирай насколько глубоко резать. Каждый
+следующий уровень включает всё из предыдущего. Цифры — реальный замер по
+твоему `pak01_dir.vpk` (371,479 entries):
+
+| Bundle | Категорий | Файлов | Исходный размер | Что теряешь визуально |
+|---|---:|---:|---:|---|
+| **`all-safe`**       | 8  | 160,468 | ~7.6 GB  | **ничего** — игра и UI выглядят 1-в-1 как ванилла |
+| **`all-aggressive`** | 19 | 221,931 | ~37.6 GB | в меню пропадают портреты героев / иконки / loading-screen картинки; в самой игре герои выглядят нормально |
+| **`all-extreme`**    | 23 | 284,738 | ~55.6 GB | герои / крипы / пропсы рендерятся плоскими error-текстурами, но хитбоксы / анимации / HP-бары / механика работают |
+| **`all-nuclear`**    | 32 | 288,361 | ~57.1 GB | + удаляются legacy Flash-картинки UI (~1.1 GB), event-видео-тизеры, модели VS-экрана; курьеры / пет-курьеры / карточки профиля становятся плейсхолдерами. **Никаких эффектов на геймплей.** |
+| **`all-suicide`**    | 42 | 290,035 | ~58.3 GB | + 3D-превью героев в hero-pick / loadout, текстуры карты, ассеты ивент-карт (Cavern Crawl, Reef Bender, Diretide). **Вероятно ломает event-режимы / hero-pick UI.** |
+
+Выбирай **один** bundle (не комбинируй имена). Закрой Steam, потом:
+
+```bat
+REM Уровень 1 — нулевая визуальная цена (рекомендуемая база)
+5_pak66_builder\strip_assets_pak66.bat all-safe
+5_pak66_builder\set_launch_option.bat
+
+REM Уровень 2 — главное меню теряет портреты / иконки
+5_pak66_builder\strip_assets_pak66.bat all-aggressive
+5_pak66_builder\set_launch_option.bat
+
+REM Уровень 3 — герои = плоские цвета. Под автопилот / 10 ботов / прогрев акков.
+5_pak66_builder\strip_assets_pak66.bat all-extreme
+5_pak66_builder\set_launch_option.bat
+
+REM Уровень 4 — также убивает legacy Flash UI, event-видео, VS-экран, курьеров.
+5_pak66_builder\strip_assets_pak66.bat all-nuclear
+5_pak66_builder\set_launch_option.bat
+
+REM Уровень 5 — также убивает 3D-превью в hero-pick и event-карты. Может сломать ивенты.
+5_pak66_builder\strip_assets_pak66.bat all-suicide
+5_pak66_builder\set_launch_option.bat
+```
+
+#### Уровень 1 — `all-safe` (8 категорий, ~7.6 GB)
+
+Войсы героев, музыка, звуки атак, ambient, item-sounds + чисто косметические
+модели/материалы/партиклы. Всё это невидимо для геймплея: герои выглядят
+как обычно, UI не трогается, хитбоксы / урон / кулдауны без изменений.
+Подходит вообще всем, в том числе если ты играешь в одно окно и просто
+хочешь чтобы карта быстрее грузилась.
+
+#### Уровень 2 — `all-aggressive` (+11 категорий, ~+30 GB)
+
+Поверх `all-safe` стабит ещё panorama-картинки (~17.8 GB), стикеры
+(~11 GB), particle-текстуры, текстуры косметики, ивент-контент,
+loading-screen фоны, скайбокс, tournament fan content, структурные модели
+зданий.
+
+**Цена:** в главном меню / дашборде пропадают портреты героев, иконки
+предметов, loading-screen арт, превью предметов в магазине. **В самой
+игре** герои выглядят нормально — деградирует только меню / инвентарь /
+магазин.
+
+#### Уровень 3 — `all-extreme` (+4 категории, ~+18 GB)
+
+Поверх `all-aggressive` стабит текстуры героев (~3 GB), все
+`materials/models/`-текстуры (~14 GB), текстуры крипов и модели юнитов.
+
+**Цена:** герои / иллюзии / крипы / юниты на поле боя рендерятся
+**плоскими error-цветами / клетчатыми текстурами**. Игра при этом
+**полностью играбельна** — хитбоксы, анимации, HP-бары, механика спеллов
+работают — но визуально героев друг от друга не отличишь. Подходит для
+автопилот-сценариев / 10-окон-фарм / прогрева акков, когда ты в экран не
+смотришь.
+
+#### Уровень 4 — `all-nuclear` (+9 категорий, ~+1.5 GB)
+
+Поверх `all-extreme` стабит:
+
+- `resource/flash3/` PNG-картинки (~1.14 GB) — старый Flash UI, давно
+  заменённый на Panorama; чистый мёртвый вес.
+- `scripts/workshop_import_templates/` (~98 MB) — шаблоны Workshop для
+  разработчиков.
+- `models/versus/` (~133 MB) — модели на pre-match VS-экране.
+- `materials/overlays/` (~85 MB) — наклейки на террейн (Аегис-логотипы и
+  мотифы).
+- `models/courier/` + `models/pets/` (~70 MB) — модели курьеров и
+  пет-куриров.
+- `materials/portraits_card/` (~35 MB) — карточки профилей.
+
+**Цена:** в главном меню исчезают legacy-баннеры и event-видео-тизеры;
+курьеры/пет-куриры выглядят как плейсхолдеры; pre-match VS-экран без
+портретов. **Ноль влияния на геймплей.**
+
+#### Уровень 5 — `all-suicide` (+10 категорий, ~+1.2 GB)
+
+Поверх `all-nuclear` стабит:
+
+- `models/ui/` (~567 MB) — 3D-превью в hero-pick / loadout.
+- `materials/maps/` (~97 MB) — атлас текстур террейн-карт.
+- `materials/nature/` (~142 MB) — nature-наклейки на террейн.
+- `maps/{reef,cavern,jungle,journey,ti10}_assets/` (~410 MB) — ассеты
+  event-режимов.
+
+**Цена:** в hero-pick / loadout превью становятся пустыми квадратами;
+event-режимы (Cavern Crawl, Reef Bender, Diretide-style мини-игры) могут
+**не загружаться или крашить**. Использовать только если не играешь в
+евенты и не нужен 3D-превью.
+
+#### Точечный контроль по категориям
+
+```bat
+5_pak66_builder\strip_assets_pak66.bat --list
+5_pak66_builder\strip_assets_pak66.bat vo,music
+5_pak66_builder\strip_assets_pak66.bat panorama-images,stickers
+```
+
+Категории, которые **намеренно заблокированы** (ломают игру):
+`heroes-models` (меши героев), `heroes-mats` (материалы героев),
+`ui-sounds` (меню / звуки кликов), `panorama` (определения UI),
+`localization` (тексты), `scripts` (npc / item / ability логика),
+`vsndevts` (определения звуковых событий). Скрипт ругнётся ошибкой, если
+ты их попросишь.
+
+#### Стак с партикл-нуком и визуал-модами
+
+`strip_assets_pak66` стакается с `kill_particles_pak66` и `apply_mods`
+через `--merge`. `kill_particles_pak66` пишет `pak66_dir.vpk` с нуля,
+значит он идёт первым; всё остальное — с `--merge`, чтобы дописать в тот
+же VPK:
+
+```bat
+5_pak66_builder\kill_particles_pak66.bat total
+5_pak66_builder\strip_assets_pak66.bat all-extreme --merge
+6_minify_mods\apply_mods.bat all --merge
+5_pak66_builder\set_launch_option.bat
+```
+
+Результат: все партиклы стабы, все войсы / музыка / косметика / звуки атак /
+panorama-картинки / hero-текстуры стабы, все визуал-моды применены
+(тёмная карта, без реки, без травы, без погоды, …). По сути **самый
+агрессивный клиентский cut**, который можно сделать без модификации
+самой `game/dota/`.
 
 ### Откат
 
